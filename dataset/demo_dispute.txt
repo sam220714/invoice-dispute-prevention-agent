@@ -1,0 +1,35 @@
+From: Prashant Dubey <ap.vendors@meridianlogistics.in>
+To: Sunita Reddy <sunita@pragatimanpower.in>
+Cc: accounts.hyd@meridianlogistics.in
+Date: Mon, 6 Oct 2026, 7:42 PM
+Subject: RE: Invoice INV-2026-0847 - Sept 2026 - Pragati Facility & Manpower
+
+Dear Madam,
+
+We have reviewed the invoice and the following observations are there:
+
+1. OT claimed is 186 hours. Our site managers have issued authorisation only
+   for Medchal (ref MLP-OT-9931, 40 hours). Patancheru forklift OT and the
+   Shamshabad housekeeping OT are not authorised. Kindly remove the
+   unauthorised portion.
+
+2. Two loaders at Shamshabad have been billed for the full month. Our gate
+   records show Shaik Imran last entry 18/09 and B. Rao last entry 22/09.
+   Please bill only till last working day.
+
+3. The PO number is again given only in the reference field and not against
+   the lines. We have told this earlier also. Our system cannot post it in
+   this form.
+
+4. SAC code is shown only in the header. It is required on every line item.
+
+5. The lines are given role wise. Please group them site wise, as our GL
+   posting is done site wise.
+
+Please share the revised invoice at the earliest. Note that our portal
+accepts invoices only from 1st to 5th of the month.
+
+Regards,
+Prashant Dubey
+Accounts Payable
+Meridian Logistics Park Pvt Ltd

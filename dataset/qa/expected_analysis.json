@@ -1,0 +1,87 @@
+{
+  "invoice_id": "INV-2026-0847",
+  "demo_held_out_rules": [
+    "MER-R2",
+    "MER-R4",
+    "YOG-R5"
+  ],
+  "claims": [
+    {
+      "claim": "Overtime at Shamshabad and Patancheru is not authorised; only Medchal's 40 hours are",
+      "bucket": "business",
+      "lines_affected": [
+        "L9",
+        "L11"
+      ],
+      "proposed_fix": "adjust_line(L9, qty, 0); adjust_line(L11, qty, 0)",
+      "value_impact_inr": -19710,
+      "autonomy": "propose_merchant_approves",
+      "matches_existing_rule": "MER-R5 (DSP-004) — OT requires a Meridian authorisation number"
+    },
+    {
+      "claim": "Two exited loaders billed for the full month",
+      "bucket": "business",
+      "lines_affected": [
+        "L6"
+      ],
+      "proposed_fix": "adjust_line(L6, qty, 520) — Shaik Imran 12 days and B. Rao 8 days removed",
+      "value_impact_inr": -13600,
+      "autonomy": "propose_merchant_approves",
+      "matches_existing_rule": "MER-R6 (DSP-008) — bill only to last working day per Meridian gate records"
+    },
+    {
+      "claim": "PO number is not against the lines",
+      "bucket": "format",
+      "lines_affected": [
+        "all"
+      ],
+      "proposed_fix": "set_field(po_number) on every line",
+      "value_impact_inr": 0,
+      "autonomy": "auto_apply",
+      "matches_existing_rule": "MER-R1 (DSP-001, DSP-002)"
+    },
+    {
+      "claim": "SAC code is only in the header, not on every line",
+      "bucket": "format",
+      "lines_affected": [
+        "all"
+      ],
+      "proposed_fix": "set_field(sac) on every line",
+      "value_impact_inr": 0,
+      "autonomy": "auto_apply",
+      "matches_existing_rule": "MER-R3 (DSP-006)"
+    },
+    {
+      "claim": "Lines are grouped role-wise; Meridian wants them site-wise",
+      "bucket": "format",
+      "lines_affected": [
+        "all"
+      ],
+      "proposed_fix": "regroup_lines(site_code)",
+      "value_impact_inr": 0,
+      "autonomy": "auto_apply",
+      "matches_existing_rule": null
+    }
+  ],
+  "new_rules_to_learn": [
+    {
+      "rule_id": "MER-R2",
+      "type": "format",
+      "rule": "Lines must be grouped site-wise, not role-wise.",
+      "note": "From claim 5. Earlier asked for in DSP-007."
+    },
+    {
+      "rule_id": "MER-R4",
+      "type": "format",
+      "rule": "Meridian's portal accepts invoices only between the 1st and 5th of the month.",
+      "note": "From the closing remark, not a numbered claim. Earlier stated in DSP-006."
+    }
+  ],
+  "wage_reduction_inr": 33310.0,
+  "revised_invoice_total_inr": 2440108.44,
+  "original_invoice_total_inr": 2488552.84,
+  "total_reduction_inr": 48444.4,
+  "collectable_now_inr": 2440108.44,
+  "note_on_split": "The revised total is collectable immediately once the two business claims are accepted. Under today's process the whole invoice waits while a Rs 48,444 disagreement is settled — and the format items would have stalled it a further two weeks on top.",
+  "commentary": "Four of the five claims match rules already learned from earlier disputes (MER-R1, R3, R5, R6). The agent should say so explicitly — that is the prevention argument: every one of these was foreseeable before the invoice was sent. The fifth claim and the closing remark are new rules to learn."
+}

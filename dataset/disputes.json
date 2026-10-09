@@ -1,0 +1,227 @@
+[
+  {
+    "dispute_id": "DSP-001",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0712",
+    "received_at": "2026-06-19",
+    "channel": "email",
+    "detected_how": "chased after 14 days of silence",
+    "raw_text": "Dear Sir,\n\nYour invoice is not appearing in our system. Please check and resubmit.\n\nRegards,\nPrashant Dubey\nAP - Meridian Logistics Park",
+    "buckets": [
+      "format"
+    ],
+    "resolution": "Found the Ariba upload had failed validation because the PO number was entered in the reference field instead of the line-item field. Re-uploaded 21 Jun.",
+    "days_delayed": 19,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-002",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0729",
+    "received_at": "2026-07-14",
+    "channel": "email",
+    "detected_how": "chased",
+    "raw_text": "Hi,\n\nInvoice rejected again. PO number is given only in the reference field. Our system cannot post without the PO against each line item. Kindly revise.\n\nPrashant",
+    "buckets": [
+      "format"
+    ],
+    "resolution": "PO number added against every line and re-uploaded.",
+    "days_delayed": 12,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-004",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0745",
+    "received_at": "2026-08-11",
+    "channel": "email",
+    "detected_how": "chased",
+    "raw_text": "Madam,\n\nThe OT amount claimed is not supported. Site manager has not raised any OT authorisation for Patancheru for July. Please remove or provide authorisation number.\n\nPrashant Dubey",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "57 of 142 OT hours had no authorisation reference. Credit note issued for Rs 7,695. Balance paid.",
+    "days_delayed": 16,
+    "amount_disputed": 7695
+  },
+  {
+    "dispute_id": "DSP-006",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0831",
+    "received_at": "2026-09-17",
+    "channel": "phone, confirmed by email",
+    "detected_how": "chased after 14 days of silence",
+    "raw_text": "As discussed on call - the invoice was rejected by the portal on upload. SAC code is required on each line item. Your invoice has it only in the header. Please correct and upload. Note our portal window for submission is 1st to 5th, so this will now move to next month's run.",
+    "buckets": [
+      "format"
+    ],
+    "resolution": "SAC 998519 added to each line. Re-uploaded 18 Sep but outside window, so it sat until 1 Oct. Paid 29 Oct — 26 days late.",
+    "days_delayed": 26,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-007",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0712",
+    "received_at": "2026-06-28",
+    "channel": "email",
+    "detected_how": "reply",
+    "raw_text": "Kindly group the lines site wise (Shamshabad, Medchal, Patancheru). Currently you have given role wise which does not match our GL posting.",
+    "buckets": [
+      "format"
+    ],
+    "resolution": "Re-sorted lines by site.",
+    "days_delayed": 6,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-008",
+    "buyer_id": "BUY-MERIDIAN",
+    "invoice_id": "INV-2026-0698",
+    "received_at": "2026-06-05",
+    "channel": "email",
+    "detected_how": "proactive from buyer",
+    "raw_text": "Two of your loaders left on 20th May but you have billed full month. Our gate records show last entry 20/05. Please revise.",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Credit note for 22 man-days, Rs 14,960.",
+    "days_delayed": 11,
+    "amount_disputed": 14960
+  },
+  {
+    "dispute_id": "DSP-009",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0714",
+    "received_at": "2026-06-30",
+    "channel": "email with marked-up annexure",
+    "detected_how": "buyer replied",
+    "raw_text": "Dear Sunita,\n\nPlease find attached our reconciliation against your annexure. As per our gate register the total man-days for the period is 1,478 against your claim of 1,512. Difference of 34 man-days is mainly from the operator helper category. Marked in yellow.\n\nAlso please note our cycle is 26th to 25th. You have billed 26th to 30th September in this invoice which should move to next bill.\n\nKindly revise and resend.\n\nRegards,\nLakshmi Narayanan\nManager - Accounts",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Verified against gate register — Yogita was correct on 29 of 34 days. Revised invoice issued. The 5 contested days were withdrawn to keep the relationship smooth.",
+    "days_delayed": 14,
+    "amount_disputed": 26520
+  },
+  {
+    "dispute_id": "DSP-010",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0731",
+    "received_at": "2026-07-29",
+    "channel": "email",
+    "detected_how": "buyer replied",
+    "raw_text": "Sunita,\n\nOT of 186 hours claimed at 2x rate. Plant head has approved only 94 hours at 1.5x for this period (approval YPC/OT/26-07/118). Remaining cannot be processed. Please issue revised invoice.\n\nLakshmi",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Revised to 94 hrs at 1.5x. Credit note Rs 23,122.",
+    "days_delayed": 17,
+    "amount_disputed": 23122
+  },
+  {
+    "dispute_id": "DSP-011",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0731",
+    "received_at": "2026-07-29",
+    "channel": "same email",
+    "detected_how": "buyer replied",
+    "raw_text": "Further, your service charge of 6.5% appears to be calculated on wages plus PF and ESI. Our agreement clause 4.2 provides service charge on wages component only. Please recompute.",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Agreed — contract does say wages only. Recomputed. This had been wrong for 3 months; Yogita did not claim the earlier months back.",
+    "days_delayed": 17,
+    "amount_disputed": 9431
+  },
+  {
+    "dispute_id": "DSP-012",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0748",
+    "received_at": "2026-08-28",
+    "channel": "email with marked-up annexure",
+    "detected_how": "buyer replied",
+    "raw_text": "Attached marked copy. Four workers shown present for full period but our register shows continuous absence - K. Srinivasulu 7 days, M. Yadaiah 5 days, P. Ganesh 4 days, D. Mallesh 6 days. As per practice continuous absence beyond 3 days is not billable. 22 man-days to be deducted.\n\nLakshmi",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Verified. Credit note for 22 man-days, Rs 16,940.",
+    "days_delayed": 13,
+    "amount_disputed": 16940
+  },
+  {
+    "dispute_id": "DSP-013",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0748",
+    "received_at": "2026-08-29",
+    "channel": "email",
+    "detected_how": "follow-up",
+    "raw_text": "Also the annexure format has changed from your side. Please continue to use the template we shared - we need employee code, gate ID and shift columns for our records.",
+    "buckets": [
+      "format"
+    ],
+    "resolution": "Reverted to Yogita's template.",
+    "days_delayed": 4,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-014",
+    "buyer_id": "BUY-YOGITA",
+    "invoice_id": "INV-2026-0849",
+    "received_at": "2026-10-06",
+    "channel": "email with marked-up annexure",
+    "detected_how": "buyer replied",
+    "raw_text": "Dear Sunita,\n\n31 man-days variance again this period, same pattern as earlier - operator helper category. Also the entire OT line of 214 hours has no approval reference quoted. Please check and revert.\n\nLakshmi",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "OPEN at time of dataset snapshot.",
+    "days_delayed": null,
+    "amount_disputed": 55448
+  },
+  {
+    "dispute_id": "DSP-015",
+    "buyer_id": "BUY-TEAMLEASE",
+    "invoice_id": "INV-2026-0701",
+    "received_at": "2026-07-18",
+    "channel": "none - detected at bank reconciliation",
+    "detected_how": "NEFT received was less than invoice value; no communication",
+    "raw_text": "(no message received. Invoice Rs 11,84,320. NEFT credited Rs 11,42,320. Gap Rs 42,000.)",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "After two weeks of chasing, store ops confirmed 84 uncovered shifts at Rs 500 penalty. Written off — no credit note raised, just absorbed.",
+    "days_delayed": 0,
+    "amount_disputed": 42000
+  },
+  {
+    "dispute_id": "DSP-017",
+    "buyer_id": "BUY-TEAMLEASE",
+    "invoice_id": "INV-2026-0738",
+    "received_at": "2026-09-22",
+    "channel": "none - detected at bank reconciliation",
+    "detected_how": "payment arrived 45 days after invoice date, not 30",
+    "raw_text": "(no message. Payment consistently lands on day 45-47 despite invoice stating 30 days.)",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Ravi checked the signed work order — it does say 45 days. Pragati's invoice template had been stating 30 days incorrectly for two years.",
+    "days_delayed": 0,
+    "amount_disputed": 0
+  },
+  {
+    "dispute_id": "DSP-018",
+    "buyer_id": "BUY-TEAMLEASE",
+    "invoice_id": "INV-2026-0738",
+    "received_at": "2026-09-26",
+    "channel": "none - detected at bank reconciliation",
+    "detected_how": "short credit, no advice",
+    "raw_text": "(no message. Invoice Rs 12,07,640. NEFT credited Rs 11,89,340. Gap Rs 18,300.)",
+    "buckets": [
+      "business"
+    ],
+    "resolution": "Traced to Ganesh Chaturthi double-pay shifts that the store manager had not pre-approved in writing. Absorbed.",
+    "days_delayed": 0,
+    "amount_disputed": 18300
+  }
+]

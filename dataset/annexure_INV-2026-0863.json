@@ -1,0 +1,99 @@
+{
+  "invoice_id": "INV-2026-0863",
+  "buyer_id": "BUY-MERIDIAN",
+  "note": "Extract. Only the rows relevant to the pre-send check.",
+  "rows": [
+    {
+      "emp_name": "Ramesh Kumar Yadav",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 12,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Mohd Ismail",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 31,
+      "last_working_day": "2026-10-14",
+      "ot_hours": 0,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Gopal Reddy Anumula",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 31,
+      "last_working_day": "2026-10-23",
+      "ot_hours": 0,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Mohd Rafiuddin",
+      "role": "Security Guard",
+      "site": "MD",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 20,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Srinivas Chary",
+      "role": "Security Guard",
+      "site": "MD",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 16,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Jagadish Naik",
+      "role": "Forklift Operator",
+      "site": "PY",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 28,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Venkatesh Bandari",
+      "role": "Forklift Operator",
+      "site": "PY",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 33,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Lakshmi Devi",
+      "role": "Housekeeping Attendant",
+      "site": "SH",
+      "days_billed": 31,
+      "last_working_day": null,
+      "ot_hours": 11,
+      "ot_auth_ref": null
+    }
+  ],
+  "ot_summary": {
+    "total_billed_hours": 171,
+    "hours_with_authorisation": 0,
+    "hours_without_authorisation": 171,
+    "authorisation_refs_present": [],
+    "by_site": {
+      "SH": {
+        "billed_hours": 48,
+        "authorised_hours": 0
+      },
+      "MD": {
+        "billed_hours": 42,
+        "authorised_hours": 0
+      },
+      "PY": {
+        "billed_hours": 81,
+        "authorised_hours": 0
+      }
+    }
+  }
+}

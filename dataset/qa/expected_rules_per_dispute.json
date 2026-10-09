@@ -1,0 +1,197 @@
+[
+  {
+    "dispute_id": "DSP-001",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "format"
+    ],
+    "expected_rule_text": "PO number must be entered at line-item level in Ariba, not in the invoice reference field.",
+    "expected_rule_type": "format",
+    "maps_to_rule_id": "MER-R1",
+    "maps_to_rule_ids": [
+      "MER-R1"
+    ]
+  },
+  {
+    "dispute_id": "DSP-002",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "format"
+    ],
+    "expected_rule_text": "The PO number must be entered against every line item, not only in the invoice reference field.",
+    "expected_rule_type": "format",
+    "maps_to_rule_id": "MER-R1",
+    "maps_to_rule_ids": [
+      "MER-R1"
+    ]
+  },
+  {
+    "dispute_id": "DSP-004",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Overtime is payable only against a Meridian OT authorisation number issued by the site manager.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "MER-R5",
+    "maps_to_rule_ids": [
+      "MER-R5"
+    ]
+  },
+  {
+    "dispute_id": "DSP-006",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "format"
+    ],
+    "expected_rule_text": "SAC 998519 must appear on every line, and invoices are only accepted on the portal between the 1st and 5th.",
+    "expected_rule_type": "format",
+    "maps_to_rule_id": "MER-R3",
+    "maps_to_rule_ids": [
+      "MER-R3",
+      "MER-R4"
+    ]
+  },
+  {
+    "dispute_id": "DSP-007",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "format"
+    ],
+    "expected_rule_text": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
+    "expected_rule_type": "format",
+    "maps_to_rule_id": "MER-R2",
+    "maps_to_rule_ids": [
+      "MER-R2"
+    ]
+  },
+  {
+    "dispute_id": "DSP-008",
+    "buyer_id": "BUY-MERIDIAN",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "MER-R6",
+    "maps_to_rule_ids": [
+      "MER-R6"
+    ]
+  },
+  {
+    "dispute_id": "DSP-009",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Man-days must reconcile to the plant biometric gate register, which is authoritative over Pragati's muster. Cycle is 26th to 25th.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "YOG-R1",
+    "maps_to_rule_ids": [
+      "YOG-R1",
+      "YOG-R2"
+    ]
+  },
+  {
+    "dispute_id": "DSP-010",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Overtime above 1.5x requires prior written approval from the plant head, referenced by approval number.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "YOG-R3",
+    "maps_to_rule_ids": [
+      "YOG-R3"
+    ]
+  },
+  {
+    "dispute_id": "DSP-011",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Service charge is computed on wages only, never on PF/ESI.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "YOG-R4",
+    "maps_to_rule_ids": [
+      "YOG-R4"
+    ]
+  },
+  {
+    "dispute_id": "DSP-012",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "YOG-R5",
+    "maps_to_rule_ids": [
+      "YOG-R5"
+    ]
+  },
+  {
+    "dispute_id": "DSP-013",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "format"
+    ],
+    "expected_rule_text": "The annexure must use Yogita's own Excel template with gate ID and shift columns.",
+    "expected_rule_type": "format",
+    "maps_to_rule_id": "YOG-R6",
+    "maps_to_rule_ids": [
+      "YOG-R6"
+    ]
+  },
+  {
+    "dispute_id": "DSP-014",
+    "buyer_id": "BUY-YOGITA",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": null,
+    "expected_rule_type": null,
+    "maps_to_rule_id": null,
+    "maps_to_rule_ids": []
+  },
+  {
+    "dispute_id": "DSP-015",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Uncovered shifts are deducted at Rs 500 per shift as an SLA penalty, applied silently.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "TEA-R1",
+    "maps_to_rule_ids": [
+      "TEA-R1"
+    ]
+  },
+  {
+    "dispute_id": "DSP-017",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Payment terms with Teamlease are 45 days from invoice date, not 30.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "TEA-R2",
+    "maps_to_rule_ids": [
+      "TEA-R2"
+    ]
+  },
+  {
+    "dispute_id": "DSP-018",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buckets": [
+      "business"
+    ],
+    "expected_rule_text": "Festival/holiday double-pay is not accepted unless the store manager pre-approved the shift in writing.",
+    "expected_rule_type": "business",
+    "maps_to_rule_id": "TEA-R3",
+    "maps_to_rule_ids": [
+      "TEA-R3"
+    ]
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "name": "invoice-dispute-prevention-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Razorpay x ISB AI PM Build Challenge, Track 2. Learns each buyer's unwritten billing rules from past disputes and fixes the next invoice before it is sent.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "presend": "tsx src/cli/presend.ts",
+    "analyze": "tsx src/cli/analyze.ts",
+    "try": "tsx src/cli/try.ts",
+    "eval": "tsx eval/classifier.ts",
+    "dev": "next dev",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.25.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "legal_name": "Pragati Facility & Manpower Services Pvt Ltd",
+  "short_name": "Pragati Manpower",
+  "city": "Hyderabad",
+  "state": "Telangana",
+  "state_code": "36",
+  "gstin": "36AABCP4821F1Z9",
+  "pan": "AABCP4821F",
+  "pf_code": "TG/HYD/0049283",
+  "esi_code": "52000394820001099",
+  "cin": "U74999TG2016PTC110482",
+  "founded": 2016,
+  "headcount_deployed": 500,
+  "active_clients": 20,
+  "monthly_billing_inr": 11000000,
+  "monthly_gross_margin_inr": 560000,
+  "note_revenue": "Gross billing is ~Rs 1.1 cr a month including GST. What Pragati actually keeps is the service charge, roughly Rs 5.6 lakh — about 5% of billed value and 6-7% of the wage base. Everything else is pass-through: wages, PF, ESI and GST. This is why a delayed invoice is dangerous out of proportion to the margin at stake.",
+  "client_mix": "Three anchor clients (Meridian, Yogita, Teamlease) are 193 heads and ~52% of billing. The remaining 17 clients are 307 heads at ~Rs 17,000 billed per head per month — smaller, housekeeping-heavy deployments at lower wage grades.",
+  "payroll_date": 7,
+  "payroll_note": "500 workers are paid on the 7th of every month regardless of whether clients have paid. A disputed invoice is financed from the owner's OD limit.",
+  "od_limit_inr": 4000000,
+  "od_rate_pa": 0.115,
+  "team": [
+    {
+      "name": "Sunita Reddy",
+      "role": "Billing Executive",
+      "does": "Prepares and sends all 20 invoices between the 1st and 5th. First responder to client objections. Primary user of the tool."
+    },
+    {
+      "name": "Ravi Prakash Shetty",
+      "role": "Founder / Managing Director",
+      "does": "Pulled in when a dispute is contentious or large. Approves credit notes. Signs off anything that reduces an invoice materially."
+    }
+  ]
+}

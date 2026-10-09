@@ -1,0 +1,21 @@
+# secrets: API key lives here, never committed
+.env
+.env.*
+!.env.example
+
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+
+# runtime state: mutable ledger copy + per-run context snapshots
+# (the pristine seed stays in dataset/ and is regenerable via generate.py)
+state/
+
+__pycache__/
+*.pyc
+
+.DS_Store
+
+# the challenge brief supplied by the organisers; not ours to republish
+RazorpayxISB_BuildChallenge*.pdf

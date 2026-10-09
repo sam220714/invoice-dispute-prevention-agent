@@ -1,0 +1,93 @@
+[
+  {
+    "buyer_id": "BUY-MERIDIAN",
+    "version": "v3",
+    "effective_from": "2026-04-01",
+    "rates": [
+      {
+        "role": "Security Guard",
+        "unit": "per_man_day",
+        "rate": 720
+      },
+      {
+        "role": "Housekeeping Attendant",
+        "unit": "per_man_day",
+        "rate": 640
+      },
+      {
+        "role": "Loader / Packer",
+        "unit": "per_man_day",
+        "rate": 680
+      },
+      {
+        "role": "Forklift Operator",
+        "unit": "per_man_day",
+        "rate": 950
+      },
+      {
+        "role": "Overtime",
+        "unit": "per_hour",
+        "rate": 135
+      }
+    ]
+  },
+  {
+    "buyer_id": "BUY-YOGITA",
+    "version": "v2",
+    "effective_from": "2026-07-01",
+    "rates": [
+      {
+        "role": "Machine Operator Helper",
+        "unit": "per_man_day",
+        "rate": 780
+      },
+      {
+        "role": "Material Handler",
+        "unit": "per_man_day",
+        "rate": 700
+      },
+      {
+        "role": "Housekeeping Attendant",
+        "unit": "per_man_day",
+        "rate": 620
+      },
+      {
+        "role": "Overtime (1.5x)",
+        "unit": "per_hour",
+        "rate": 146
+      },
+      {
+        "role": "Overtime (2x)",
+        "unit": "per_hour",
+        "rate": 195
+      }
+    ]
+  },
+  {
+    "buyer_id": "BUY-TEAMLEASE",
+    "version": "v4",
+    "effective_from": "2026-01-01",
+    "rates": [
+      {
+        "role": "Store Security Guard",
+        "unit": "per_man_day",
+        "rate": 690
+      },
+      {
+        "role": "Housekeeping Attendant",
+        "unit": "per_man_day",
+        "rate": 620
+      },
+      {
+        "role": "Stock Assistant",
+        "unit": "per_man_day",
+        "rate": 660
+      },
+      {
+        "role": "Overtime",
+        "unit": "per_hour",
+        "rate": 130
+      }
+    ]
+  }
+]

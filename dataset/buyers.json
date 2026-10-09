@@ -1,0 +1,79 @@
+[
+  {
+    "id": "BUY-MERIDIAN",
+    "legal_name": "Meridian Logistics Park Pvt Ltd",
+    "short_name": "Meridian",
+    "archetype": "Rigid AP portal. Silent rejections.",
+    "gstin": "36AADCM7719K1ZT",
+    "state_code": "36",
+    "ap_contact": "Prashant Dubey, AP Executive",
+    "ap_email": "ap.vendors@meridianlogistics.in",
+    "ap_system": "SAP Ariba vendor portal",
+    "payment_terms_days": 30,
+    "sites": [
+      {
+        "code": "SH",
+        "name": "Shamshabad Hub"
+      },
+      {
+        "code": "MD",
+        "name": "Medchal DC"
+      },
+      {
+        "code": "PY",
+        "name": "Patancheru Yard"
+      }
+    ],
+    "service_charge_pct": 0.07,
+    "service_charge_base": "wages_only",
+    "billing_cycle": "calendar_month",
+    "headcount": 83,
+    "behaviour": "Invoices are uploaded to an Ariba portal. If a field is missing the portal rejects silently — no email, no notification. Pragati finds out 10-14 days later when they chase payment. Prashant is responsive but only answers direct questions; he never volunteers what is wrong."
+  },
+  {
+    "id": "BUY-YOGITA",
+    "legal_name": "Yogita Precision Components Ltd",
+    "short_name": "Yogita",
+    "archetype": "Argues every number. Line-by-line scrutiny.",
+    "gstin": "36AAACK2284L1Z6",
+    "state_code": "36",
+    "ap_contact": "Mrs. Lakshmi Narayanan, Manager - Accounts",
+    "ap_email": "lakshmi.n@yogitaprecision.com",
+    "ap_system": "Email, with a marked-up Excel annexure attached",
+    "payment_terms_days": 30,
+    "sites": [
+      {
+        "code": "PL1",
+        "name": "Pashamylaram Plant"
+      }
+    ],
+    "service_charge_pct": 0.065,
+    "service_charge_base": "wages_only",
+    "billing_cycle": "26th_to_25th",
+    "headcount": 61,
+    "behaviour": "Lakshmi reconciles the invoice against the plant's biometric gate register line by line, every month, and replies with a marked-up copy of Pragati's own annexure. Her objections are specific and almost always arithmetically correct. She is not difficult — she is thorough, and Pragati's data is usually the sloppy side."
+  },
+  {
+    "id": "BUY-TEAMLEASE",
+    "legal_name": "Teamlease Retail Ventures Pvt Ltd",
+    "short_name": "Teamlease",
+    "archetype": "Silent short-payer. Deducts without explanation.",
+    "gstin": "36AAGCV5531M1ZP",
+    "state_code": "36",
+    "ap_contact": "Accounts Payable (shared mailbox, rarely replies)",
+    "ap_email": "payables@teamleaseretail.in",
+    "ap_system": "NEFT with a remittance advice PDF, sometimes",
+    "payment_terms_days": 45,
+    "sites": [
+      {
+        "code": "ST",
+        "name": "6 stores - Hyderabad metro"
+      }
+    ],
+    "service_charge_pct": 0.08,
+    "service_charge_base": "wages_plus_statutory",
+    "billing_cycle": "calendar_month",
+    "headcount": 49,
+    "behaviour": "Teamlease never raises a dispute. They simply pay less than the invoice and move on. Pragati discovers the gap at bank reconciliation, often weeks later. A remittance advice sometimes arrives, sometimes does not. By the time anyone investigates, the deduction is two cycles old and usually gets written off."
+  }
+]

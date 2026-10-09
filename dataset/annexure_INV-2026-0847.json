@@ -1,0 +1,101 @@
+{
+  "invoice_id": "INV-2026-0847",
+  "buyer_id": "BUY-MERIDIAN",
+  "note": "Extract. Only the rows the September dispute references.",
+  "rows": [
+    {
+      "emp_name": "Ramesh Kumar Yadav",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 14,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Shaik Imran",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 30,
+      "last_working_day": "2026-09-18",
+      "ot_hours": 0,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Bhaskar Rao Gundu",
+      "role": "Loader / Packer",
+      "site": "SH",
+      "days_billed": 30,
+      "last_working_day": "2026-09-22",
+      "ot_hours": 0,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Mohd Rafiuddin",
+      "role": "Security Guard",
+      "site": "MD",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 22,
+      "ot_auth_ref": "MLP-OT-9931"
+    },
+    {
+      "emp_name": "Srinivas Chary",
+      "role": "Security Guard",
+      "site": "MD",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 18,
+      "ot_auth_ref": "MLP-OT-9931"
+    },
+    {
+      "emp_name": "Jagadish Naik",
+      "role": "Forklift Operator",
+      "site": "PY",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 26,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Venkatesh Bandari",
+      "role": "Forklift Operator",
+      "site": "PY",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 31,
+      "ot_auth_ref": null
+    },
+    {
+      "emp_name": "Lakshmi Devi",
+      "role": "Housekeeping Attendant",
+      "site": "SH",
+      "days_billed": 30,
+      "last_working_day": null,
+      "ot_hours": 9,
+      "ot_auth_ref": null
+    }
+  ],
+  "ot_summary": {
+    "total_billed_hours": 186,
+    "hours_with_authorisation": 40,
+    "hours_without_authorisation": 146,
+    "authorisation_refs_present": [
+      "MLP-OT-9931"
+    ],
+    "by_site": {
+      "SH": {
+        "billed_hours": 54,
+        "authorised_hours": 0
+      },
+      "MD": {
+        "billed_hours": 40,
+        "authorised_hours": 40
+      },
+      "PY": {
+        "billed_hours": 92,
+        "authorised_hours": 0
+      }
+    }
+  }
+}

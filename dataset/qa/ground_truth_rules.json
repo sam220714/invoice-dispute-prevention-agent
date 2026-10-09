@@ -1,0 +1,168 @@
+[
+  {
+    "rule_id": "MER-R1",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "The PO number must be entered against every line item, not only in the invoice reference field.",
+    "recoverable_from": [
+      "DSP-001",
+      "DSP-002"
+    ],
+    "expected_confidence": "high"
+  },
+  {
+    "rule_id": "MER-R2",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
+    "recoverable_from": [
+      "DSP-007"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R3",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "SAC 998519 must appear on every line, not once in the header.",
+    "recoverable_from": [
+      "DSP-006"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R4",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.",
+    "recoverable_from": [
+      "DSP-006"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R5",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "business",
+    "rule": "Overtime is payable only against a Meridian OT authorisation number issued by the site manager. Unreferenced OT is struck off.",
+    "recoverable_from": [
+      "DSP-004"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R6",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "business",
+    "rule": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.",
+    "recoverable_from": [
+      "DSP-008"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R1",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "business",
+    "rule": "Man-days must reconcile to the plant biometric gate register. Yogita's register is authoritative, not Pragati's muster.",
+    "recoverable_from": [
+      "DSP-009"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R2",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "business",
+    "rule": "Billing cycle runs 26th to 25th, not calendar month. Days after the 25th belong to the next invoice.",
+    "recoverable_from": [
+      "DSP-009"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R3",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "business",
+    "rule": "Overtime above 1.5x requires prior written approval from the plant head, referenced by approval number.",
+    "recoverable_from": [
+      "DSP-010"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R4",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "business",
+    "rule": "Service charge is computed on wages only, never on PF/ESI.",
+    "recoverable_from": [
+      "DSP-011"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R5",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "business",
+    "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
+    "recoverable_from": [
+      "DSP-012"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "YOG-R6",
+    "buyer_id": "BUY-YOGITA",
+    "buyer_short_name": "Yogita",
+    "type": "format",
+    "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.",
+    "recoverable_from": [
+      "DSP-013"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "TEA-R1",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buyer_short_name": "Teamlease",
+    "type": "business",
+    "rule": "Uncovered shifts are deducted at Rs 500 per shift as an SLA penalty, applied silently.",
+    "recoverable_from": [
+      "DSP-015"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "TEA-R2",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buyer_short_name": "Teamlease",
+    "type": "business",
+    "rule": "Payment terms are 45 days from invoice date, not the 30 days stated on Pragati's invoice.",
+    "recoverable_from": [
+      "DSP-017"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "TEA-R3",
+    "buyer_id": "BUY-TEAMLEASE",
+    "buyer_short_name": "Teamlease",
+    "type": "business",
+    "rule": "Festival/holiday double-pay is not accepted unless the store manager pre-approved the shift in writing.",
+    "recoverable_from": [
+      "DSP-018"
+    ],
+    "expected_confidence": "medium"
+  }
+]
