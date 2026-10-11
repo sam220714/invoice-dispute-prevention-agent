@@ -1,9 +1,11 @@
 import { buildPresendView } from "../../../lib/app/presend_view";
-import { listInvoices } from "../../../lib/app/status";
+import { getInvoice } from "../../../lib/data/load";
+import { isDisputable, listInvoices } from "../../../lib/app/status";
 import { rupees } from "../../../lib/app/format";
 import { InvoiceBar } from "../../components/InvoiceBar";
 import { PresendBoard } from "../../components/PresendBoard";
 import { SendButton } from "../../components/SendButton";
+import { SentInvoice } from "../../components/SentInvoice";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,16 @@ export default async function PresendPage({ params }: { params: Promise<{ id: st
   const view = buildPresendView(id);
   const row = listInvoices().find((r) => r.invoice_id === id)!;
   const v = view.verdict;
+
+  // Pre-send checking is for drafts. An invoice that has gone out has no checks open: it is read as it was sent.
+  if (getInvoice(id).status !== "draft") {
+    return (
+      <>
+        <InvoiceBar invoiceId={id} buyer={view.buyer_name} period={view.period_label} chip={row.chip} />
+        <SentInvoice view={view} chip={row.chip} total={row.total} raised={row.needs_dispute} disputable={isDisputable(id)} />
+      </>
+    );
+  }
 
   return (
     <>

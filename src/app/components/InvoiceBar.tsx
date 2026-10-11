@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { CHIP_LABEL, CHIP_TONE, type Chip } from "../../lib/app/chips";
 
-export function InvoiceTabs({ id }: { id: string }) {
+export function InvoiceTabs({ id, disputable = true, draft = false }: { id: string; disputable?: boolean; draft?: boolean }) {
   const path = usePathname();
   const dispute = path.endsWith("/dispute");
   return (
     <div className="tabs">
-      <Link href={`/invoices/${id}`} aria-current={dispute ? undefined : "page"}>Pre-send check</Link>
-      <Link href={`/invoices/${id}/dispute`} aria-current={dispute ? "page" : undefined}>Dispute analysis</Link>
+      <Link href={`/invoices/${id}`} aria-current={dispute ? undefined : "page"}>{draft ? "Pre-send check" : "Invoice"}</Link>
+      {disputable && <Link href={`/invoices/${id}/dispute`} aria-current={dispute ? "page" : undefined}>Dispute analysis</Link>}
     </div>
   );
 }

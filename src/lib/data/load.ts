@@ -139,12 +139,23 @@ export const loadSplit = (seed: number = ledgerSeed(), hold: string[] = []): Led
   splitLedger(loadRulePool(), seed, hold);
 
 /**
- * The live ledger. Created from the context half of the split on first use, then
- * mutated by the app, so learning between runs is observable. The pool is never
- * written.
+ * The rules the live ledger starts with. Every rule in the pool by default. LEDGER_RULES=12 starts from the
+ * seeded split instead, holding the rest out so a dispute has something genuinely new to teach.
+ */
+export function startingRules(seed: number = ledgerSeed()): Rule[] {
+  const raw = process.env.LEDGER_RULES;
+  if (raw === undefined || raw === "") return loadRulePool();
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0) throw new Error(`LEDGER_RULES must be a whole number, got "${raw}"`);
+  return splitLedger(loadRulePool(), seed, [], Math.min(n, loadRulePool().length)).context;
+}
+
+/**
+ * The live ledger. Created from the starting rules on first use, then mutated by the app, so learning
+ * between runs is observable. The pool is never written.
  */
 export function loadLedger(): Rule[] {
-  if (!existsSync(ledgerPath())) saveLedger(loadSplit().context);
+  if (!existsSync(ledgerPath())) saveLedger(startingRules());
   return z.array(RuleSchema).parse(JSON.parse(readFileSync(ledgerPath(), "utf-8")));
 }
 
@@ -153,9 +164,9 @@ export function saveLedger(rules: Rule[]): void {
   writeFileSync(ledgerPath(), JSON.stringify(rules, null, 2) + "\n", "utf-8");
 }
 
-/** Back to the context half of the split. Used between demo runs and by tests. */
+/** Back to the starting rules. Used between demo runs and by tests. */
 export function resetLedger(seed: number = ledgerSeed()): Rule[] {
-  const { context } = loadSplit(seed);
+  const context = startingRules(seed);
   saveLedger(context);
   return context;
 }

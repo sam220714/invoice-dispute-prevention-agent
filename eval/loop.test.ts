@@ -21,12 +21,17 @@ import { demoInput, demoReply, stubMeta } from "./demo_reply";
 
 let dir: string;
 const previous = process.env.STATE_DIR;
+const previousRules = process.env.LEDGER_RULES;
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "loop-"));
   process.env.STATE_DIR = dir;
+  // This loop is the seeded demo: three rules held out for the dispute to teach.
+  process.env.LEDGER_RULES = "12";
   resetState(DEMO_SEED);
 });
 afterAll(() => {
+  if (previousRules === undefined) delete process.env.LEDGER_RULES;
+  else process.env.LEDGER_RULES = previousRules;
   if (previous === undefined) delete process.env.STATE_DIR;
   else process.env.STATE_DIR = previous;
   rmSync(dir, { recursive: true, force: true });

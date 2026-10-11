@@ -10,9 +10,11 @@ interface Props {
   lines: number;
   /** An example message for this invoice, when the dataset has one. */
   sample: string | null;
+  /** The invoice has not been sent yet. */
+  draft?: boolean;
 }
 
-export function PasteBox({ invoiceId, buyer, rules, lines, sample }: Props) {
+export function PasteBox({ invoiceId, buyer, rules, lines, sample, draft }: Props) {
   const [state, action, pending] = useActionState<AnalyzeState, FormData>(analyzeAction.bind(null, invoiceId), { response: null, text: "" });
   const [text, setText] = useState("");
   const r = state.response && !state.response.ok ? state.response : null;
@@ -23,7 +25,7 @@ export function PasteBox({ invoiceId, buyer, rules, lines, sample }: Props) {
         <div>
           <div className="flag" style={{ color: "var(--text-2)" }}>DISPUTE</div>
           <h2>Paste what {buyer} sent.</h2>
-          <p className="sub">An email, a portal note or the text of a marked-up sheet. The agent reads it against {buyer}&apos;s {rules} rules and this invoice&apos;s {lines} lines.</p>
+          <p className="sub">An email, a portal note or the text of a marked-up sheet. The agent reads it against {buyer}&apos;s {rules} rules and this invoice&apos;s {lines} lines.{draft && " This invoice has not been sent, so any rule it teaches is checked on this draft too."}</p>
         </div>
       </div>
 

@@ -114,11 +114,11 @@ export function PresendBoard({ view }: { view: PresendView }) {
                       {n.keep}
                     </button>
                   )}
-                  <button className="why" aria-expanded={open === key} onClick={() => toggleOpen(key)}>why</button>
+                  <button className="why" aria-expanded={open === key} onClick={() => toggleOpen(key)}>Why</button>
                 </div>
               )}
               {view.read_only && (
-                <div className="act"><button className="why" aria-expanded={open === key} onClick={() => toggleOpen(key)}>why</button></div>
+                <div className="act"><button className="why" aria-expanded={open === key} onClick={() => toggleOpen(key)}>Why</button></div>
               )}
 
               {waiving === n.rule_id && (
@@ -231,7 +231,7 @@ function HandledRow({
         </div>
         {h.kind === "approved" && <span className="cut num">−{rupees(h.cut)}</span>}
         {h.kind === "formats" && (
-          <button className="why" aria-expanded={open} onClick={(e) => { e.stopPropagation(); onToggle(); }}>what</button>
+          <button className="why" aria-expanded={open} onClick={(e) => { e.stopPropagation(); onToggle(); }}>What</button>
         )}
         {h.kind !== "formats" && h.undo && (
           <button className="link" disabled={busy} onClick={(e) => { e.stopPropagation(); onUndo(); }}>Undo</button>
@@ -242,7 +242,7 @@ function HandledRow({
           <ul>
             {h.fixes.map((f) => (
               <li key={f.rule_id}>
-                {f.text} · <Id>{f.rule_id}</Id>, from <Sources sources={f.sources} />
+                {f.text} · <Id>{f.rule_id}</Id>
               </li>
             ))}
           </ul>

@@ -45,3 +45,22 @@ export function compactLines(ids: string[]): string {
 
 /** The first word of a person's name: "Prashant Dubey" -> "Prashant". */
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+
+/**
+ * A short summary of a longer text: whole sentences up to `max` characters, never a cut word. When even the
+ * first sentence is too long it is cut at a word boundary and ends in an ellipsis.
+ */
+export function summarise(text: string, max = 150): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const sentences = clean.match(/[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g)?.map((x) => x.trim()) ?? [clean];
+  let out = "";
+  for (const sentence of sentences) {
+    const next = out ? `${out} ${sentence}` : sentence;
+    if (next.length > max) break;
+    out = next;
+  }
+  if (out) return out;
+  const cut = clean.slice(0, max).replace(/\s+\S*$/, "");
+  return `${cut}…`;
+}

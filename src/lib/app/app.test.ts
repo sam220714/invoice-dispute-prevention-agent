@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { resetState } from "../data/load";
 import { DEMO_SEED } from "../data/split";
-import { compactLines, inr, rupees, shortDate, Word } from "./format";
+import { compactLines, inr, rupees, shortDate, summarise, Word } from "./format";
 import { buildPresendView, workingDraft } from "./presend_view";
 import { proposeFor } from "./propose";
 import { locate, segmentMessage } from "./quotes";
@@ -22,6 +22,22 @@ describe("format", () => {
     expect(Word(4)).toBe("Four");
     expect(shortDate("2026-10-06")).toBe("6 Oct");
     expect(compactLines(["L9", "L11", "L10", "L1"])).toBe("L1, L9-L11");
+  });
+});
+
+describe("summarise", () => {
+  it("keeps a short text whole", () => {
+    expect(summarise("Re-sorted lines by site.")).toBe("Re-sorted lines by site.");
+  });
+  it("ends on a whole sentence, not a cut word", () => {
+    const t = "Found the Ariba upload had failed validation because the PO number was entered in the reference field instead of the line-item field. Re-uploaded 21 Jun.";
+    expect(summarise(t)).toBe("Found the Ariba upload had failed validation because the PO number was entered in the reference field instead of the line-item field.");
+    expect(summarise("Verified against gate register — Yogita was correct on 29 of 34 days. Revised invoice issued. The 5 contested days were withdrawn to keep the relationship smooth.")).toBe("Verified against gate register — Yogita was correct on 29 of 34 days. Revised invoice issued.");
+  });
+  it("cuts a single long sentence at a word", () => {
+    const out = summarise("word ".repeat(60).trim() + ".", 40);
+    expect(out.endsWith("…")).toBe(true);
+    expect(out.length).toBeLessThanOrEqual(41);
   });
 });
 
@@ -62,11 +78,13 @@ describe("pre-send view on the demo ledger", () => {
     dir = mkdtempSync(join(tmpdir(), "presend-view-"));
     process.env.STATE_DIR = dir;
     process.env.LEDGER_SEED = String(DEMO_SEED);
+    process.env.LEDGER_RULES = "12";
   });
   afterAll(() => {
     process.env.STATE_DIR = saved.state;
     if (saved.seed === undefined) delete process.env.LEDGER_SEED;
     else process.env.LEDGER_SEED = saved.seed;
+    delete process.env.LEDGER_RULES;
     rmSync(dir, { recursive: true, force: true });
   });
   beforeEach(() => {

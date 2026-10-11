@@ -80,9 +80,11 @@ describe("rule ledger persistence", () => {
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), "ledger-"));
     process.env.STATE_DIR = dir;
+    process.env.LEDGER_RULES = "12";
   });
   afterEach(() => {
     delete process.env.STATE_DIR;
+    delete process.env.LEDGER_RULES;
     rmSync(dir, { recursive: true, force: true });
   });
 
@@ -96,6 +98,12 @@ describe("rule ledger persistence", () => {
   it("bootstraps the live ledger from the context half of the split on first load", () => {
     expect(loadLedger()).toEqual(loadSplit(DEMO_SEED).context);
     expect(loadLedger()).toHaveLength(CONTEXT_RULES);
+  });
+
+  it("starts from every rule in the pool when LEDGER_RULES is not set", () => {
+    delete process.env.LEDGER_RULES;
+    expect(loadLedger()).toEqual(loadRulePool());
+    expect(loadLedger()).toHaveLength(15);
   });
 
   it("LEDGER_SEED chooses a different split", () => {

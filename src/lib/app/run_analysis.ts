@@ -56,6 +56,8 @@ export async function analyseMessage(invoiceId: string, message: string, opts: {
     return { ok: false, kind: "resolved", message: "This dispute is already resolved. Reset the demo to run it again." };
 
   const invoice = getInvoice(invoiceId);
+  if (invoice.status === "paid_late")
+    return { ok: false, kind: "resolved", message: "This invoice is already paid, so there is nothing left to dispute." };
   const input: ContextInput = {
     buyer: getBuyer(invoice.buyer_id),
     invoice,

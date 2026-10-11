@@ -36,10 +36,12 @@ interface Props {
   /** The lines the selected finding or claim touches. */
   touch: Touch;
   footer?: ReactNode;
+  /** Overrides the header's right-hand label. */
+  caption?: string;
 }
 
 /** The artefact the agent reasoned about. Selecting a finding on the left lights its lines here. */
-export function InvoicePanel({ lines, grouped, base, now, touch, footer }: Props) {
+export function InvoicePanel({ lines, grouped, base, now, touch, footer, caption }: Props) {
   const rows: ReactNode[] = [];
   let site: string | null = null;
   for (const l of lines) {
@@ -69,7 +71,7 @@ export function InvoicePanel({ lines, grouped, base, now, touch, footer }: Props
     <aside aria-label="Invoice">
       <header>
         <h3>Invoice</h3>
-        <span>{grouped ? "grouped site-wise" : "as drafted"}</span>
+        <span>{caption ?? (grouped ? "grouped site-wise" : "as drafted")}</span>
       </header>
       <div className="scroll">
         <table>

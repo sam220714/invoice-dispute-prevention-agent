@@ -15,6 +15,8 @@ export interface DisputeRow {
   summary: string;
   days_delayed: number | null;
   amount: number;
+  /** Raised here and not yet decided: no dispute record exists until it is saved. */
+  awaiting?: boolean;
 }
 
 type Key = "dispute" | "days" | "amount";
@@ -42,10 +44,14 @@ export function DisputeTable({ rows }: { rows: DisputeRow[] }) {
           </thead>
           <tbody>
             {sorted.map((d) => (
-              <tr key={d.dispute_id}>
+              <tr key={d.awaiting ? `awaiting:${d.invoice_id}` : d.dispute_id}>
                 <td>
-                  <span className="id">{d.dispute_id}</span>
-                  <span className="sub">{shortDate(d.received_at, true)}</span>
+                  {d.awaiting ? <span className="sub">Awaiting decision</span> : (
+                    <>
+                      <span className="id">{d.dispute_id}</span>
+                      <span className="sub">{shortDate(d.received_at, true)}</span>
+                    </>
+                  )}
                 </td>
                 <td>
                   {d.buyer}
@@ -56,8 +62,9 @@ export function DisputeTable({ rows }: { rows: DisputeRow[] }) {
                 <td>
                   {d.buckets.map((b) => <span key={b} className={`tag ${b === "business" ? "biz" : "fmt"}`} style={{ marginRight: 6 }}>{title(b)}</span>)}
                   {d.open && <span className="state hold" style={{ marginRight: 6 }}>Open</span>}
+                  {d.awaiting && <Link href={`/invoices/${d.invoice_id}/dispute`}>Review</Link>}
                   {d.fresh && <span className="state done" style={{ marginRight: 6 }}>Resolved here</span>}
-                  <span className="sub" style={{ marginTop: 4 }}>{d.summary}</span>
+                  {d.summary && <span className="sub" style={{ marginTop: 4 }}>{d.summary}</span>}
                 </td>
                 <td className="r num hide-s">{d.days_delayed ?? "–"}</td>
                 <td className="r num hide-s">{d.amount ? rupees(d.amount) : "–"}</td>

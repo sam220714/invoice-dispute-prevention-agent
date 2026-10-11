@@ -202,7 +202,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
             )}
             {resolved?.next_draft && (
               <Link className="btn go go-link" href={`/invoices/${resolved.next_draft.invoice_id}`}>
-                Run the pre-send check on {resolved.next_draft.period_label}&apos;s draft →
+                {resolved.next_draft.invoice_id === bar.invoiceId ? "Run the pre-send check on this draft again →" : <>Run the pre-send check on {resolved.next_draft.period_label}&apos;s draft →</>}
               </Link>
             )}
           </div>
@@ -255,7 +255,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
                         {plural(resolved.corroborated.length, "existing rule")} confirmed again
                         <i>Each one that saw a second dispute is more trusted</i>
                       </div>
-                      <button className="why" aria-expanded={open === "confirmed"} onClick={() => toggleOpen("confirmed")}>what</button>
+                      <button className="why" aria-expanded={open === "confirmed"} onClick={() => toggleOpen("confirmed")}>What</button>
                     </div>
                     <div className="more" hidden={open !== "confirmed"}>
                       <ul>
@@ -392,7 +392,7 @@ function ClaimCard(p: CardProps) {
           {decision && !p.locked && (
             <button className="link" onClick={(e) => { e.stopPropagation(); p.onUndo(); }}>Undo</button>
           )}
-          <button className="why" aria-expanded={open} onClick={(e) => { e.stopPropagation(); p.onToggle(); }}>why</button>
+          <button className="why" aria-expanded={open} onClick={(e) => { e.stopPropagation(); p.onToggle(); }}>Why</button>
         </div>
         {why}
       </div>
@@ -423,7 +423,7 @@ function ClaimCard(p: CardProps) {
             <button className="btn" aria-expanded={p.declining} onClick={p.onDeclineStart}>Decline</button>
           </>
         )}
-        <button className="why" aria-expanded={open} onClick={p.onToggle}>why</button>
+        <button className="why" aria-expanded={open} onClick={p.onToggle}>Why</button>
       </div>
 
       {p.editing && (

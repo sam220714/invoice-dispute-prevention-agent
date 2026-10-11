@@ -6,8 +6,6 @@ import { RulesBoard, type RuleData } from "../components/RulesBoard";
 
 export const dynamic = "force-dynamic";
 
-const CONFIDENCE_ORDER = { high: 0, medium: 1, low: 2 } as const;
-
 export default function RulesPage() {
   const rules = loadLedger();
   const buyers = loadBuyers();
@@ -17,7 +15,7 @@ export default function RulesPage() {
   const active = rules.filter((r) => r.status === "active").length;
 
   const data: RuleData[] = [...rules]
-    .sort((x, y) => CONFIDENCE_ORDER[x.confidence] - CONFIDENCE_ORDER[y.confidence] || x.rule_id.localeCompare(y.rule_id, "en", { numeric: true }))
+    .sort((x, y) => x.rule_id.localeCompare(y.rule_id, "en", { numeric: true }))
     .map((r) => {
       const stale = staleSignal(overrides, r.rule_id);
       const isNew = r.learned_from.every((d) => fresh.has(d));

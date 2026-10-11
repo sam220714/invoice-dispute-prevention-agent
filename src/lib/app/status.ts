@@ -21,16 +21,21 @@ export interface InvoiceRow {
   total: number;
   /** A draft with decisions still open. */
   open: number | null;
-  /** In dispute and not yet resolved here. */
+  /** A dispute has been raised here and not yet decided. */
   needs_dispute: boolean;
 }
 
 export function listInvoices(): InvoiceRow[] {
   const records = loadAllRecords();
   return loadInvoices().map((inv) => {
-    const resolved = loadAnalysis(inv.invoice_id)?.resolved;
+    const stored = loadAnalysis(inv.invoice_id);
+    const resolved = stored?.resolved;
+    // A dispute exists once a buyer's message has been read here and not yet decided. The dataset's own
+    // "disputed" / "short_paid" labels do not start one: until a message is pasted, the invoice is just sent.
+    const raised = Boolean(stored && !stored.resolved);
     const sentAt = records[inv.invoice_id]?.sent_at;
-    const chip: Chip = sentAt ? "sent" : resolved ? "revised" : (inv.status as Chip);
+    const base: Chip = inv.status === "disputed" || inv.status === "short_paid" ? "sent" : (inv.status as Chip);
+    const chip: Chip = sentAt ? "sent" : resolved ? "revised" : raised && inv.status !== "draft" ? "disputed" : base;
     return {
       invoice_id: inv.invoice_id,
       buyer_id: inv.buyer_id,
@@ -41,7 +46,7 @@ export function listInvoices(): InvoiceRow[] {
       chip: chip in CHIP_LABEL ? chip : "paid_late",
       total: sentAt ? (records[inv.invoice_id]!.sent_total ?? inv.totals.grand_total) : resolved ? resolved.revised_total : inv.totals.grand_total,
       open: inv.status === "draft" && !sentAt ? openDecisions(inv.invoice_id) : null,
-      needs_dispute: !resolved && (inv.status === "disputed" || inv.status === "short_paid"),
+      needs_dispute: raised,
     };
   });
 }
@@ -50,7 +55,7 @@ export interface RailCounts {
   invoices: number;
   /** Decisions waiting across every unsent draft. */
   presend: number;
-  /** Invoices in dispute that nobody has resolved yet. */
+  /** Disputes raised here and not yet decided. */
   disputes: number;
   rules: number;
   /** The first draft with something open (else the first draft), where the Pre-send link goes. */
@@ -67,4 +72,9 @@ export function railCounts(): RailCounts {
     rules: loadLedger().filter((r) => r.status === "active").length,
     presendTarget: (drafts.find((r) => (r.open ?? 0) > 0) ?? drafts[0])?.invoice_id ?? null,
   };
+}
+
+/** A paid invoice is a closed chapter: there is nothing left to dispute. */
+export function isDisputable(invoiceId: string): boolean {
+  return listInvoices().find((r) => r.invoice_id === invoiceId)?.chip !== "paid_late";
 }

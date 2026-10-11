@@ -44,7 +44,7 @@ export function InvoiceTable({ rows }: { rows: InvoiceRow[] }) {
                   {r.open ? (
                     <Link href={`/invoices/${r.invoice_id}`}>{r.open} to decide</Link>
                   ) : r.needs_dispute ? (
-                    <Link href={`/invoices/${r.invoice_id}/dispute`}>Paste the buyer&apos;s message</Link>
+                    <Link href={`/invoices/${r.invoice_id}/dispute`}>Review the dispute</Link>
                   ) : null}
                 </td>
               </tr>

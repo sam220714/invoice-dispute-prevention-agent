@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { loadInvoices } from "../../../lib/data/load";
+import { getInvoice, loadInvoices } from "../../../lib/data/load";
+import { isDisputable } from "../../../lib/app/status";
 import { InvoiceTabs } from "../../components/InvoiceBar";
 
 export default async function InvoiceLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
@@ -8,7 +9,7 @@ export default async function InvoiceLayout({ children, params }: { children: Re
   if (!loadInvoices().some((i) => i.invoice_id === id)) notFound();
   return (
     <>
-      <InvoiceTabs id={id} />
+      <InvoiceTabs id={id} disputable={isDisputable(id)} draft={getInvoice(id).status === "draft"} />
       {children}
     </>
   );
