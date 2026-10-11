@@ -98,6 +98,9 @@ export function checkMessage(raw: string): InputVerdict {
     // A full stop, a closing bracket, or a name or title: it ends where an email ends.
   } else if (/\d$/.test(last) && body.length <= 2) {
     // A short note that ends on an amount or a count.
+  } else if (lines.length === 1 && last.split(/\s+/).length < 8) {
+    // A single short line ("lol what's up") is a whole message, not the top of an email. It is not a cut-off
+    // worth stopping for: the model will say whether it holds any claim.
   } else {
     signals.push(`it ends in the middle of a sentence, on "${last.split(/\s+/).slice(-4).join(" ")}"`);
   }

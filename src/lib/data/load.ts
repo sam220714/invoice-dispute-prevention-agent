@@ -160,6 +160,31 @@ export function resetLedger(seed: number = ledgerSeed()): Rule[] {
   return context;
 }
 
+// ---------------------------------------------------------- app records
+// The screens' own records (decisions, saved analyses) live under state/, one JSON file each.
+const appPath = (rel: string) => {
+  if (!/^[\w.-]+(\/[\w.-]+)*$/.test(rel) || rel.includes("..")) throw new Error(`bad state path: ${rel}`);
+  return join(stateDir(), ...rel.split("/"));
+};
+
+export function readStateJson<T>(rel: string, fallback: T): T {
+  const path = appPath(rel);
+  if (!existsSync(path)) return fallback;
+  try {
+    return JSON.parse(readFileSync(path, "utf-8")) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export function writeStateJson(rel: string, value: unknown): void {
+  const path = appPath(rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(value, null, 2) + "\n", "utf-8");
+}
+
+export const removeState = (rel: string): void => rmSync(appPath(rel), { force: true, recursive: true });
+
 // ---------------------------------------------------------------- outcomes
 // Disputes resolved through the agent. Kept apart from dataset/ (which is
 // regenerated) and merged in only where history matters: the last-5 few-shot slice.

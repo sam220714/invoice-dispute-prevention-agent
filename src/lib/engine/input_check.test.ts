@@ -34,6 +34,10 @@ describe("no false alarms on real messages", () => {
     expect(status("Payment came in short by Rs 42,000")).toBe("ok");
   });
 
+  it("passes a single short line with no full stop, instead of calling it cut off", () => {
+    expect(status("lol what's up")).toBe("ok");
+  });
+
   it("passes Windows line endings and a header block", () => {
     expect(status(demo.replace(/\n/g, "\r\n"))).toBe("ok");
   });

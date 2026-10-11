@@ -1,23 +1,30 @@
 import type { ReactNode } from "react";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { loadAgency } from "../lib/data/load";
+import { railCounts } from "../lib/app/status";
+import { Rail } from "./components/Rail";
 import "./globals.css";
 
-export const metadata = { title: "Pre-send check", description: "Catch the dispute before the invoice goes out." };
+export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Invoices · Pragati Manpower",
+  description: "Catch the dispute before the invoice goes out.",
+};
+
+const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-plex-sans", display: "swap" });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono", display: "swap" });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const counts = railCounts();
+  const agency = loadAgency();
+  const biller = agency.team.find((t) => /billing/i.test(t.role)) ?? agency.team[0];
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
-        <header className="top">
-          <span className="brand">Razorpay Invoices</span>
-          <nav>
-            <a className="on" href="/">Pre-send check</a>
-            <span className="soon">Dispute analysis</span>
-            <span className="soon">Rule ledger</span>
-            <span className="soon">Disputes</span>
-          </nav>
-          <span className="who">Pragati Facility &amp; Manpower</span>
-        </header>
-        <main>{children}</main>
+        <div className="app">
+          <Rail counts={counts} agency={agency.short_name} who={biller ? { name: biller.name, role: biller.role } : null} />
+          <div className="stage">{children}</div>
+        </div>
       </body>
     </html>
   );
