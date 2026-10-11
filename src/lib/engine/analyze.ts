@@ -5,6 +5,7 @@ import type { Claim, ProposedCall, RuleProposal } from "./analysis_schema";
 import { type TotalsDelta } from "./arithmetic";
 import { runChecks } from "./checks";
 import { assembleContext, type AgentContext, type ContextInput } from "./context";
+import { checkMessage, type NotReady } from "./input_check";
 import { runAnalysis, type AnalysisMeta } from "./llm_call";
 import { buildPreSendReport, type PreSendReport } from "./presend";
 import { applyToolCall, createDraft, previewImpact, type Draft, type ToolCall, type ToolResult } from "./tools";
@@ -285,7 +286,23 @@ export function processAnalysis(
   };
 }
 
-export async function analyzeDispute(input: ContextInput, provider: LlmProvider): Promise<AnalysisResult> {
+/** The pasted message is not ready to analyse. Nothing has been sent to the model. */
+export class MessageNotReady extends Error {
+  constructor(readonly verdict: NotReady) {
+    super(verdict.message);
+    this.name = "MessageNotReady";
+  }
+}
+
+export interface AnalyzeOptions {
+  /** The person has seen the "looks cut off" warning and wants to go ahead. Never overrides a blocked message. */
+  proceedAnyway?: boolean;
+}
+
+export async function analyzeDispute(input: ContextInput, provider: LlmProvider, opts: AnalyzeOptions = {}): Promise<AnalysisResult> {
+  // Before any model call: a message that is empty, huge, or looks cut off costs nothing to refuse.
+  const verdict = checkMessage(input.message);
+  if (verdict.status === "blocked" || (verdict.status === "maybe_cut_off" && !opts.proceedAnyway)) throw new MessageNotReady(verdict);
   const ctx = assembleContext(input);
   const { analysis, meta } = await runAnalysis(ctx, provider);
   return processAnalysis(input, ctx, analysis, meta);

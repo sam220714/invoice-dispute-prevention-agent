@@ -8,6 +8,7 @@ import {
   BuyerSchema,
   DisputeSchema,
   InvoiceSchema,
+  OverrideSchema,
   RateCardSchema,
   RuleSchema,
   type Agency,
@@ -15,6 +16,7 @@ import {
   type Buyer,
   type Dispute,
   type Invoice,
+  type Override,
   type RateCard,
   type Rule,
 } from "../schema";
@@ -193,10 +195,21 @@ export function recordOutcome(dispute: Dispute, merchantAccepted: boolean): void
   writeFileSync(outcomesPath(), JSON.stringify([...outcomes, record], null, 2) + "\n", "utf-8");
 }
 
-/** Back to a clean demo: the split's ledger, no resolved disputes, no outcomes. */
+// --------------------------------------------------------------- overrides
+const overridesPath = () => join(stateDir(), "overrides.json");
+
+export const loadOverrides = (): Override[] =>
+  existsSync(overridesPath()) ? z.array(OverrideSchema).parse(JSON.parse(readFileSync(overridesPath(), "utf-8"))) : [];
+
+export function saveOverrides(overrides: Override[]): void {
+  mkdirSync(stateDir(), { recursive: true });
+  writeFileSync(overridesPath(), JSON.stringify(overrides, null, 2) + "\n", "utf-8");
+}
+
+/** Back to a clean demo: the split's ledger, no resolved disputes, no outcomes, no overrides. */
 export function resetState(seed: number = ledgerSeed()): void {
   resetLedger(seed);
-  for (const p of [resolvedPath(), outcomesPath()]) rmSync(p, { force: true });
+  for (const p of [resolvedPath(), outcomesPath(), overridesPath()]) rmSync(p, { force: true });
 }
 
 // ------------------------------------------------------------------ prompts

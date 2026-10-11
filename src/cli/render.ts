@@ -1,5 +1,6 @@
 import type { AnalysisResult, ClaimOutcome } from "../lib/engine/analyze";
 import type { Resolution } from "../lib/engine/learn";
+import type { ReviewedReport } from "../lib/engine/overrides";
 import type { PreSendReport, ReportItem } from "../lib/engine/presend";
 import type { LogEntry } from "../lib/engine/tools";
 
@@ -43,7 +44,9 @@ export function summariseApplied(log: LogEntry[]): string[] {
   });
 }
 
-export function renderReport(report: PreSendReport, opts: { color?: boolean; applied?: string[] } = {}): string {
+export function renderReport(report: PreSendReport | ReviewedReport, opts: { color?: boolean; applied?: string[] } = {}): string {
+  const reviewed = "overridden" in report ? report : null;
+  const waived = reviewed?.overridden ?? [];
   const c = (code: keyof typeof ANSI, s: string) => (opts.color ? ANSI[code] + s + ANSI.reset : s);
   const out: string[] = [];
   const line = (s = "") => out.push(s);
@@ -56,7 +59,9 @@ export function renderReport(report: PreSendReport, opts: { color?: boolean; app
   line();
 
   const { business, format } = report;
-  if (report.can_send_as_is) {
+  if (report.can_send_as_is && waived.length) {
+    line(c("green", `Ready to send. ${plural(waived.length, "business item")} waived by you; the format fixes still apply.`));
+  } else if (report.can_send_as_is) {
     line(c("green", "Nothing found. This invoice matches every rule in the buyer's ledger."));
   } else {
     line(
@@ -90,6 +95,9 @@ export function renderReport(report: PreSendReport, opts: { color?: boolean; app
           `      learned from ${r.learned_from.join(", ")} | ${r.confidence} confidence`,
         ),
       );
+      const sig = reviewed?.signals[r.rule_id];
+      if (sig) line(c("yellow", `      overridden before on ${sig.overridden_on.join(", ")}${sig.may_be_out_of_date ? ": this rule may be out of date" : ""}`));
+      if (reviewed?.reopened.includes(r.rule_id)) line(c("yellow", "      you overrode this earlier, but the invoice has changed, so it is open again"));
       line();
     }
   };
@@ -107,6 +115,17 @@ export function renderReport(report: PreSendReport, opts: { color?: boolean; app
     line(c("bold", `NEEDS A HUMAN (${report.manual.length})`) + c("dim", "  the linter cannot decide these"));
     for (const m of report.manual) line(`  [${m.rule_id}] ${m.note}`);
     line();
+  }
+
+  if (waived.length) {
+    line(c("bold", `OVERRIDDEN (${waived.length})`) + c("dim", "  waived by the merchant for this invoice; the rule is unchanged"));
+    for (const { override: o, signal } of waived) {
+      line(`  [${o.rule_id}] ${o.summary}`);
+      line(c("dim", `      ${o.reason ? `reason: ${o.reason}` : "no reason given"} | ${o.by ? `by ${o.by}, ` : ""}${o.at.slice(0, 10)}`));
+      if (signal.may_be_out_of_date)
+        line(c("yellow", `      this rule has now been overridden on ${signal.overridden_on.join(", ")}: it may be out of date`));
+      line();
+    }
   }
 
   if (report.passed.length) {

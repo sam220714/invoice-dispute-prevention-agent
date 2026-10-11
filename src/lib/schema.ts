@@ -232,3 +232,28 @@ export interface CheckResult {
   /** Present when outcome is "manual": why the linter could not decide. */
   note?: string;
 }
+
+// --------------------------------------------------------------- overrides
+/**
+ * The merchant looked at a flagged finding and decided it is fine for this invoice, because of something
+ * the ledger does not know. Only business and manual-review findings can be overridden; format fixes cannot.
+ */
+export const OverrideSchema = z.object({
+  /** One override per invoice and rule: overriding again replaces it. */
+  invoice_id: z.string(),
+  buyer_id: z.string(),
+  rule_id: z.string(),
+  bucket: BucketSchema,
+  kind: z.enum(["finding", "manual_review"]),
+  /**
+   * Identifies the finding that was overridden (rule, lines, message). If the invoice changes so the
+   * finding changes, the override no longer matches and the finding comes back for another look.
+   */
+  fingerprint: z.string(),
+  /** The finding as the merchant saw it, so the audit trail reads without the invoice. */
+  summary: z.string(),
+  reason: z.string().nullable(),
+  by: z.string().nullable(),
+  at: z.string(),
+});
+export type Override = z.infer<typeof OverrideSchema>;

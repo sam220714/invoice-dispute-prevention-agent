@@ -17,6 +17,11 @@ export interface Decision {
   approve_claims: string[];
   /** Indexes into proposed_rules, or "all". Rules the merchant does not approve are not learned. */
   approve_rules: number[] | "all";
+  /**
+   * Why a business claim was not approved, keyed by claim id: something the agent could not know. Optional.
+   * It goes on the dispute's record, which later disputes see as history.
+   */
+  decline_reasons?: Record<string, string>;
 }
 
 export interface Corroboration {
@@ -169,7 +174,11 @@ export function applyApprovals(
   const resolution =
     `Resolved on ${result.received_on}. ` +
     (applied.length ? `Applied: ${applied.join("; ")}.` : "Nothing applied.") +
-    (declined.length ? ` Not approved: ${declined.join(", ")}.` : "") +
+    (declined.length
+      ? ` Not approved: ${declined
+          .map((id) => (decision.decline_reasons?.[id]?.trim() ? `${id} (${decision.decline_reasons[id]!.trim()})` : id))
+          .join(", ")}.`
+      : "") +
     (written.length ? ` Learned: ${written.map((r) => r.rule_id).join(", ")}.` : "");
 
   const dispute: Dispute = {

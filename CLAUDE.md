@@ -44,6 +44,14 @@ scope: the tool does not suggest attachments, block a send or raise a task. If a
 asks for something the invoice data cannot support, the agent puts it in `unclear` as
 "needs a human" and carries on.
 
+**Manual override.** The merchant can know things the ledger does not. A business or
+manual-review finding can be overridden for one invoice, with an optional reason: the invoice
+goes out with its format fixes and the finding is waived on the record
+(`src/lib/engine/overrides.ts`, `state/overrides.json`). Format fixes cannot be overridden. An
+override never edits or disables the rule; the same rule overridden on 2 different invoices is
+marked "may be out of date" for the merchant to review. Declining a business proposal in a
+dispute works the same way (format fixes stay, nothing is learned from the declined claim).
+
 One agent, two handlers — **not two tools**. The merchant does not know which bucket
 their dispute is; a real email mixes them. Classifying is the agent's first act of
 intelligence.
@@ -211,6 +219,16 @@ edits. Run `python3 -I dataset/qa/verify.py` after any change; it must pass.
 
 Expected output for step 3 is in `dataset/qa/expected_analysis.json`. Use it as a test
 oracle — if a live run disagrees, find out which is wrong before a judge does.
+
+---
+
+## QA runner (sub-agent)
+
+`.claude/agents/qa-runner.md` runs the suites and reports what they printed, so long test
+output stays out of the main context. It runs and reports; it does not judge, diagnose or
+edit. Offline suites (`npm test`, typecheck, `verify.py`, presend) run by default. Live
+evals (`npm run eval`, `eval:tools`) spend Gemini quota and run only when named. Use it
+for routine "is everything still green?" checks; read failures in the main session.
 
 ---
 

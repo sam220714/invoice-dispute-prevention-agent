@@ -1,5 +1,6 @@
 import { getBuyer, getInvoice, loadAnnexure, loadDisputes, loadLedger, loadPrompt } from "../data/load";
 import type { Annexure, Buyer, Dispute, Invoice, Rule } from "../schema";
+import { tailOf } from "./input_check";
 
 /**
  * Context assembly: deterministic, no retrieval. A buyer has tens of rules, not
@@ -171,7 +172,7 @@ export function assembleContext(input: ContextInput): AgentContext {
       name: "Recent resolved disputes", items: history.length, chars: size(payload.recent_resolved_disputes),
       detail: history.length ? history.map((d) => d.dispute_id).join(", ") : "none",
     },
-    { name: "Buyer's message", items: 1, chars: message.length, detail: `received ${input.receivedOn}` },
+    { name: "Buyer's message", items: 1, chars: message.length, detail: `received ${input.receivedOn}; ends: "${tailOf(message)}"` },
   ];
 
   return {

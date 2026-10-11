@@ -15,6 +15,7 @@ export interface ReportItem {
 
 export interface PreSendReport {
   invoice_id: string;
+  buyer_id: string;
   buyer_name: string;
   period_label: string;
   invoice_date: string;
@@ -61,6 +62,7 @@ export function buildPreSendReport(ctx: CheckContext, rules: Rule[]): PreSendRep
 
   return {
     invoice_id: ctx.invoice.invoice_id,
+    buyer_id: ctx.buyer.id,
     buyer_name: ctx.invoice.buyer_name,
     period_label: ctx.invoice.period_label,
     invoice_date: ctx.invoice.invoice_date,
