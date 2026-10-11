@@ -14,6 +14,7 @@
     "analyze": "tsx src/cli/analyze.ts",
     "try": "tsx src/cli/try.ts",
     "eval": "tsx eval/classifier.ts",
+    "eval:tools": "tsx eval/toolcalls.ts",
     "dev": "next dev",
     "build": "next build"
   },
