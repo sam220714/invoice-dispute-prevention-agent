@@ -40,7 +40,7 @@ describe("dataset loaders", () => {
     expect(loadBuyers()).toHaveLength(3);
     expect(loadInvoices()).toHaveLength(5);
     expect(loadDisputes()).toHaveLength(15);
-    expect(loadDemoDispute()).toContain("Prashant Dubey");
+    expect(loadDemoDispute()).toContain("OT claimed is 186 hours");
   });
 
   it("look up by id and fail loudly on a bad id", () => {
@@ -162,21 +162,21 @@ describe("seeded split of the rule pool", () => {
 
   it("the demo seed holds out the two Meridian rules the demo dispute teaches", () => {
     const held = ids(splitLedger(pool, DEMO_SEED).heldOut);
-    expect(held).toEqual(["MER-R2", "MER-R4", "YOG-R5"]);
+    expect(held).toEqual(["MER-R5", "MER-R6", "YOG-R6"]);
   });
 
   it("--hold forces named rules out, whatever the seed, and the seed chooses the rest", () => {
     for (const seed of [1, 7, 42, 273]) {
-      const s = splitLedger(pool, seed, ["MER-R5", "MER-R2"]);
-      expect(ids(s.heldOut)).toEqual(expect.arrayContaining(["MER-R2", "MER-R5"]));
+      const s = splitLedger(pool, seed, ["MER-R3", "MER-R5"]);
+      expect(ids(s.heldOut)).toEqual(expect.arrayContaining(["MER-R5", "MER-R3"]));
       expect(s.context).toHaveLength(12);
       expect(ids([...s.context, ...s.heldOut])).toEqual(ids(pool));
     }
-    expect(ids(splitLedger(pool, 7, ["MER-R5"]).heldOut)).toEqual(ids(splitLedger(pool, 7, ["MER-R5"]).heldOut));
+    expect(ids(splitLedger(pool, 7, ["MER-R3"]).heldOut)).toEqual(ids(splitLedger(pool, 7, ["MER-R3"]).heldOut));
   });
 
   it("holding more than the spare rules shrinks the context instead of failing", () => {
-    const s = splitLedger(pool, 3, ["MER-R1", "MER-R2", "MER-R3", "MER-R4", "MER-R5"]);
+    const s = splitLedger(pool, 3, ["MER-R1", "MER-R5", "MER-R2", "MER-R6", "MER-R3"]);
     expect(s.context).toHaveLength(10);
     expect(s.heldOut).toHaveLength(5);
   });

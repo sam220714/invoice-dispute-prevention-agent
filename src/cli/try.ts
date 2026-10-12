@@ -22,7 +22,7 @@ import { renderAnalysis } from "./render";
  *   npm run try -- --text "Kindly ..." --invoice INV-2026-0849   the same, inline
  *
  *   --hold A,B        force these rules out of the context whatever the seed says
- *                     (npm run try -- --hold MER-R5 tests whether the model learns the
+ *                     (npm run try -- --hold MER-R3 tests whether the model learns the
  *                     overtime rule from the demo email); the seed chooses the rest
  *   --invoice ID      the invoice the message is about. Optional: without it, the buyer's
  *                     latest invoice that has gone out is used (never a draft)

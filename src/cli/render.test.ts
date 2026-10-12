@@ -56,7 +56,7 @@ describe("renderReport", () => {
 
   it("reads correctly for a single finding", () => {
     const invoice = getInvoice("INV-2026-0863");
-    const onlySac = loadSplit(DEMO_SEED).context.filter((r) => r.rule_id === "MER-R3");
+    const onlySac = loadSplit(DEMO_SEED).context.filter((r) => r.rule_id === "MER-R2");
     const one = renderReport(buildPreSendReport({ invoice, buyer: getBuyer(invoice.buyer_id), annexure: null }, onlySac));
     expect(one).toContain("The 1 finding comes from a rule");
     expect(one).not.toContain("All 1 findings");

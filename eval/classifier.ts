@@ -32,7 +32,7 @@ const flag = (name: string) => {
 };
 
 /** One rule per buyer, held out. With 15 rules in the pool that leaves exactly the 12 that go into context. */
-const HOLD = ["MER-R4", "YOG-R2", "TEA-R2"];
+const HOLD = ["MER-R6", "YOG-R2", "TEA-R2"];
 
 interface Case {
   kind: "existing" | "new";
@@ -50,15 +50,15 @@ interface Case {
 const NEW_RUNS = Math.max(1, Number(flag("runs") ?? 3));
 const CASES: Case[] = [
   // Meridian
-  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-004", rule: "MER-R5", runs: 1 }, // overtime needs an authorisation number
-  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-008", rule: "MER-R6", runs: 1 }, // exited workers
-  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-007", rule: "MER-R2", runs: 1 }, // group lines site-wise
-  { kind: "new", buyer: "BUY-MERIDIAN", dispute: "DSP-006", rule: "MER-R4", runs: NEW_RUNS }, // the 1st-5th window
+  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-004", rule: "MER-R3", runs: 1 }, // overtime needs an authorisation number
+  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-008", rule: "MER-R4", runs: 1 }, // exited workers
+  { kind: "existing", buyer: "BUY-MERIDIAN", dispute: "DSP-007", rule: "MER-R5", runs: 1 }, // group lines site-wise
+  { kind: "new", buyer: "BUY-MERIDIAN", dispute: "DSP-006", rule: "MER-R6", runs: NEW_RUNS }, // the 1st-5th window
   // Yogita
   { kind: "existing", buyer: "BUY-YOGITA", dispute: "DSP-010", rule: "YOG-R3", runs: 1 }, // overtime approval
   { kind: "existing", buyer: "BUY-YOGITA", dispute: "DSP-011", rule: "YOG-R4", runs: 1 }, // service charge base
   { // absence over 3 days
-    kind: "existing", buyer: "BUY-YOGITA", dispute: "DSP-012", rule: "YOG-R5", runs: 1,
+    kind: "existing", buyer: "BUY-YOGITA", dispute: "DSP-012", rule: "YOG-R6", runs: 1,
     knownLimit: "the email names four workers and asks to deduct 22 man-days, but the dataset has no invoice or annexure for DSP-012, only Yogita's latest invoice, which lists no workers",
   },
   { kind: "new", buyer: "BUY-YOGITA", dispute: "DSP-009", rule: "YOG-R2", runs: NEW_RUNS }, // the 26th-25th cycle
@@ -67,9 +67,9 @@ const CASES: Case[] = [
   // rightly returns nothing: they need the short-payment trigger, which v1 does not have. So the one
   // workable dispute is run both ways: in context three times (a different rule is held out for these),
   // and held out three times.
-  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R4", "YOG-R2", "TEA-R1"] },
-  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R4", "YOG-R2", "TEA-R1"] },
-  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R4", "YOG-R2", "TEA-R1"] },
+  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R6", "YOG-R2", "TEA-R1"] },
+  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R6", "YOG-R2", "TEA-R1"] },
+  { kind: "existing", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: 1, hold: ["MER-R6", "YOG-R2", "TEA-R1"] },
   { kind: "new", buyer: "BUY-TEAMLEASE", dispute: "DSP-017", rule: "TEA-R2", runs: NEW_RUNS }, // 45-day payment terms
 ];
 

@@ -14,11 +14,11 @@ import type { Rule } from "../schema";
 export const CONTEXT_RULES = 12;
 
 /**
- * The seed the demo runs on. It holds out MER-R2 (site-wise grouping), MER-R4
- * (the 1st-5th portal window) and YOG-R5, so the demo dispute teaches two new
+ * The seed the demo runs on. It holds out MER-R5 (site-wise grouping), MER-R6
+ * (the 1st-5th portal window) and YOG-R6, so the demo dispute teaches two new
  * Meridian rules. A test asserts this still holds.
  */
-export const DEMO_SEED = 396;
+export const DEMO_SEED = 469;
 
 /** mulberry32: a tiny seeded generator. Math.random() cannot be seeded. */
 function mulberry32(seed: number): () => number {

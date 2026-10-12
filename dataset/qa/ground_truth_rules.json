@@ -16,17 +16,6 @@
     "buyer_id": "BUY-MERIDIAN",
     "buyer_short_name": "Meridian",
     "type": "format",
-    "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
-    "recoverable_from": [
-      "DSP-007"
-    ],
-    "expected_confidence": "medium"
-  },
-  {
-    "rule_id": "MER-R3",
-    "buyer_id": "BUY-MERIDIAN",
-    "buyer_short_name": "Meridian",
-    "type": "format",
     "rule": "SAC 998519 must appear on every line, not once in the header.",
     "recoverable_from": [
       "DSP-006"
@@ -34,18 +23,7 @@
     "expected_confidence": "medium"
   },
   {
-    "rule_id": "MER-R4",
-    "buyer_id": "BUY-MERIDIAN",
-    "buyer_short_name": "Meridian",
-    "type": "format",
-    "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.",
-    "recoverable_from": [
-      "DSP-006"
-    ],
-    "expected_confidence": "medium"
-  },
-  {
-    "rule_id": "MER-R5",
+    "rule_id": "MER-R3",
     "buyer_id": "BUY-MERIDIAN",
     "buyer_short_name": "Meridian",
     "type": "business",
@@ -56,13 +34,35 @@
     "expected_confidence": "medium"
   },
   {
-    "rule_id": "MER-R6",
+    "rule_id": "MER-R4",
     "buyer_id": "BUY-MERIDIAN",
     "buyer_short_name": "Meridian",
     "type": "business",
     "rule": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.",
     "recoverable_from": [
       "DSP-008"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R5",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
+    "recoverable_from": [
+      "DSP-007"
+    ],
+    "expected_confidence": "medium"
+  },
+  {
+    "rule_id": "MER-R6",
+    "buyer_id": "BUY-MERIDIAN",
+    "buyer_short_name": "Meridian",
+    "type": "format",
+    "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.",
+    "recoverable_from": [
+      "DSP-006"
     ],
     "expected_confidence": "medium"
   },
@@ -114,10 +114,10 @@
     "rule_id": "YOG-R5",
     "buyer_id": "BUY-YOGITA",
     "buyer_short_name": "Yogita",
-    "type": "business",
-    "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
+    "type": "format",
+    "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.",
     "recoverable_from": [
-      "DSP-012"
+      "DSP-013"
     ],
     "expected_confidence": "medium"
   },
@@ -125,10 +125,10 @@
     "rule_id": "YOG-R6",
     "buyer_id": "BUY-YOGITA",
     "buyer_short_name": "Yogita",
-    "type": "format",
-    "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.",
+    "type": "business",
+    "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
     "recoverable_from": [
-      "DSP-013"
+      "DSP-012"
     ],
     "expected_confidence": "medium"
   },

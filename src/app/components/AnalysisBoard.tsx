@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { commitAnalysis, discardAnalysis, previewDecision } from "../actions";
-import { plural, rupees, shortDate, Word, word } from "../../lib/app/format";
+import { plural, rupees, Word, word } from "../../lib/app/format";
 import type { AnalysisView, ClaimView, Preview, RuleView } from "../../lib/app/analysis_view";
 import type { Chip } from "../../lib/app/chips";
-import { activate, Call, Id, Sources, type Touch } from "./bits";
+import { activate, Id, Sources, type Touch } from "./bits";
 import { InvoiceBar } from "./InvoiceBar";
 import { InvoicePanel } from "./InvoicePanel";
 
@@ -117,7 +117,12 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   const isOpenCard = (c: ClaimView) =>
     c.status === "proposed" ? !decisions[c.claim_id] : c.status !== "applied";
   const needs = view.claims.filter(isOpenCard);
-  const handled = view.claims.filter((c) => !isOpenCard(c));
+  // "Already handled" is what the ledger already knew, business or format. A settled claim that taught a
+  // new rule is listed with the new rules instead.
+  const settled = view.claims.filter((c) => !isOpenCard(c));
+  const handled = settled.filter((c) => c.seen !== "new");
+  const learnedNow = settled.filter((c) => c.seen === "new");
+  const newRules = view.rules.filter((r) => !r.duplicate_of);
 
   // ---- verdict
   const { matched, total } = view.foreseen;
@@ -135,9 +140,9 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   let sub: string;
   if (resolved) sub = `Filed as ${resolved.dispute_id}. ${resolved.corroborated.length ? `${plural(resolved.corroborated.length, "rule")} already in the ledger ${resolved.corroborated.length === 1 ? "was" : "were"} confirmed again.` : ""}`;
   else if (total === 0) sub = "The agent found nothing in it to act on. If this was the wrong message, paste a different one.";
-  else if (pending.length) sub = `${view.buyer_contact}'s message, read ${shortDate(view.received_on)}. ${pending.length === 1 ? "One changes" : `${Word(pending.length)} change`} the billed amount, so ${pending.length === 1 ? "it waits" : "they wait"} for you.`;
+  else if (pending.length) sub = `${pending.length === 1 ? "One changes" : `${Word(pending.length)} change`} the billed amount, so ${pending.length === 1 ? "it waits" : "they wait"} for you.`;
   else if (proposed.length) sub = "All decided. Save to write what this taught to the ledger.";
-  else sub = `${view.buyer_contact}'s message, read ${shortDate(view.received_on)}. Nothing here changes the billed amount.`;
+  else sub = "Nothing here changes the billed amount.";
 
   const verdictFlag = resolved ? "SAVED" : total === 0 ? "NO CLAIMS" : matched ? "FORESEEABLE" : "NEW";
   const verdictTone = resolved ? "saved" : "attn";
@@ -164,7 +169,10 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
       onApprove={() => { decide(c.claim_id, "approved"); setEditing(null); setDeclining(null); }}
       onEdit={() => { setEditing(editing === c.claim_id ? null : c.claim_id); setDeclining(null); setSelected(c.claim_id); }}
       onEditQty={(key, v, max) => setEdits((m) => ({ ...m, [key]: Math.max(0, Math.min(max, Number.isFinite(v) ? v : max)) }))}
-      onResetEdits={() => setEdits((m) => Object.fromEntries(Object.entries(m).filter(([k]) => !k.startsWith(`${c.claim_id}:`))))}
+      onResetEdits={() => {
+        setEdits((m) => Object.fromEntries(Object.entries(m).filter(([k]) => !k.startsWith(`${c.claim_id}:`))));
+        setEditing(null);
+      }}
       onDeclineStart={() => { setDeclining(declining === c.claim_id ? null : c.claim_id); setEditing(null); setDraftReason(""); setSelected(c.claim_id); }}
       onReason={setDraftReason}
       onDecline={() => { decide(c.claim_id, "declined"); setReasons((m) => ({ ...m, [c.claim_id]: draftReason.trim() })); setDeclining(null); }}
@@ -225,8 +233,11 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
             {handled.length > 0 && <p className="lbl f">Already handled</p>}
             {handled.map(card)}
 
-            {!resolved && view.rules.some((r) => !r.duplicate_of) && <p className="lbl f">New rules for {view.buyer_short}&apos;s ledger</p>}
-            {!resolved && view.rules.filter((r) => !r.duplicate_of).map((r) => (
+            {(learnedNow.length > 0 || (!resolved && newRules.length > 0)) && (
+              <p className="lbl f">{resolved ? "New rules learned" : `New rules for ${view.buyer_short}'s ledger`}</p>
+            )}
+            {learnedNow.map(card)}
+            {!resolved && newRules.map((r) => (
               <RuleRow
                 key={r.ix} r={r} on={selected === `rule:${r.ix}`} checked={learn.has(r.ix) && !ruleBlocked(r)} blocked={ruleBlocked(r)}
                 onSelect={() => setSelected(`rule:${r.ix}`)}
@@ -289,7 +300,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
           <aside className="msg" aria-label="Source">
             <header style={{ padding: 0, display: "block" }}>
               <div className="tabs2" role="tablist">
-                <button role="tab" aria-selected={tab === "message"} onClick={() => setTab("message")}>What {view.buyer_contact} wrote</button>
+                <button role="tab" aria-selected={tab === "message"} onClick={() => setTab("message")}>The message</button>
                 <button role="tab" aria-selected={tab === "invoice"} onClick={() => setTab("invoice")}>Invoice</button>
               </div>
             </header>
@@ -354,7 +365,6 @@ function ClaimCard(p: CardProps) {
   const biz = c.bucket === "business";
   const why = (
     <div className="more" hidden={!open}>
-      <Call calls={c.calls} />
       {c.checks.length > 0 && (
         <ul className="plain">
           {c.checks.map((k) => (
@@ -363,11 +373,6 @@ function ClaimCard(p: CardProps) {
         </ul>
       )}
       <p className="rule">{c.rationale}</p>
-      <p className="from">
-        {c.foresight
-          ? <>Matches <Id>{c.foresight.rule_id}</Id>, learned from <Sources sources={c.foresight.sources} /></>
-          : "No rule in the ledger covered this."}
-      </p>
     </div>
   );
 

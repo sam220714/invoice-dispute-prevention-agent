@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Invoices · Pragati Manpower",
+  title: "Razorpay · Invoices",
   description: "Catch the dispute before the invoice goes out.",
 };
 

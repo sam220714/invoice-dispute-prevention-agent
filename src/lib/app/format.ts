@@ -43,8 +43,6 @@ export function compactLines(ids: string[]): string {
   return out.join(", ");
 }
 
-/** The first word of a person's name: "Prashant Dubey" -> "Prashant". */
-export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
 
 /**
  * A short summary of a longer text: whole sentences up to `max` characters, never a cut word. When even the

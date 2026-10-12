@@ -4,7 +4,7 @@ import { DEMO_SEED } from "../data/split";
 import type { Invoice, Rule } from "../schema";
 import { buildPreSendReport } from "./presend";
 
-// The ledger the demo starts from: 12 of the 15 rules. MER-R2, MER-R4 and YOG-R5 are not in it yet.
+// The ledger the demo starts from: 12 of the 15 rules. MER-R5, MER-R6 and YOG-R6 are not in it yet.
 const seed = loadSplit(DEMO_SEED).context;
 const report = (invoice: Invoice, rules: Rule[] = seed) =>
   buildPreSendReport(
@@ -17,8 +17,8 @@ describe("pre-send report: October draft (INV-2026-0863)", () => {
   const r = report(getInvoice("INV-2026-0863"));
 
   it("is the headline: 2 business lines to review, 2 format fixes", () => {
-    expect(ids(r.business)).toEqual(["MER-R5", "MER-R6"]);
-    expect(ids(r.format)).toEqual(["MER-R1", "MER-R3"]);
+    expect(ids(r.business)).toEqual(["MER-R3", "MER-R4"]);
+    expect(ids(r.format)).toEqual(["MER-R1", "MER-R2"]);
   });
 
   it("cannot be sent as it stands", () => {
@@ -26,7 +26,7 @@ describe("pre-send report: October draft (INV-2026-0863)", () => {
   });
 
   it("flags only the overtime lines at sites that billed more than was authorised", () => {
-    const ot = r.business.find((i) => i.rule.rule_id === "MER-R5")!;
+    const ot = r.business.find((i) => i.rule.rule_id === "MER-R3")!;
     expect(ot.finding.line_ids).toEqual(["L9", "L10", "L11"]);
     expect(ot.finding.facts.unreferenced_hours).toBe(171);
   });
@@ -47,13 +47,13 @@ describe("pre-send report: October draft (INV-2026-0863)", () => {
   });
 
   it("the 1st-5th window passes on a draft dated 3 Nov, once the rule is in the ledger", () => {
-    const withWindow = [...seed, ...loadSplit(DEMO_SEED).heldOut.filter((x) => x.rule_id === "MER-R4")];
-    expect(report(getInvoice("INV-2026-0863"), withWindow).passed.map((p) => p.rule_id)).toContain("MER-R4");
+    const withWindow = [...seed, ...loadSplit(DEMO_SEED).heldOut.filter((x) => x.rule_id === "MER-R6")];
+    expect(report(getInvoice("INV-2026-0863"), withWindow).passed.map((p) => p.rule_id)).toContain("MER-R6");
   });
 
   it("a held-out grouping rule would flag the role-wise lines", () => {
-    const withGrouping = [...seed, ...loadSplit(DEMO_SEED).heldOut.filter((x) => x.rule_id === "MER-R2")];
-    const hit = report(getInvoice("INV-2026-0863"), withGrouping).format.find((i) => i.rule.rule_id === "MER-R2");
+    const withGrouping = [...seed, ...loadSplit(DEMO_SEED).heldOut.filter((x) => x.rule_id === "MER-R5")];
+    const hit = report(getInvoice("INV-2026-0863"), withGrouping).format.find((i) => i.rule.rule_id === "MER-R5");
     expect(hit?.finding.facts.interleaved_sites).toEqual(["Shamshabad Hub", "Medchal DC", "Patancheru Yard"]);
   });
 });
@@ -63,7 +63,7 @@ describe("pre-send report: other buyers", () => {
     const r = report(getInvoice("INV-2026-0849"));
     expect(r.business).toEqual([]);
     expect(r.format).toEqual([]);
-    expect(r.manual.map((m) => m.rule_id)).toEqual(["YOG-R1", "YOG-R3", "YOG-R6"]);
+    expect(r.manual.map((m) => m.rule_id)).toEqual(["YOG-R1", "YOG-R3", "YOG-R5"]);
     expect(r.passed.map((p) => p.rule_id)).toEqual(["YOG-R2", "YOG-R4"]);
     // Manual items are advisory; they do not block.
     expect(r.can_send_as_is).toBe(true);
@@ -80,7 +80,7 @@ describe("pre-send report: other buyers", () => {
 describe("pre-send report: the ledger drives the result", () => {
   it("a disabled rule stops being checked", () => {
     const off = seed.map((x) => (x.rule_id === "MER-R1" ? { ...x, status: "disabled" as const } : x));
-    expect(ids(report(getInvoice("INV-2026-0863"), off).format)).toEqual(["MER-R3"]);
+    expect(ids(report(getInvoice("INV-2026-0863"), off).format)).toEqual(["MER-R2"]);
   });
 
   it("an empty ledger finds nothing, which is the point of having one", () => {

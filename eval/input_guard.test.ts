@@ -21,16 +21,8 @@ describe("the guard in front of the model", () => {
     await expect(analyzeDispute(withMessage("  "), never)).rejects.toBeInstanceOf(MessageNotReady);
   });
 
-  it("holds a cut-off message back, and carries the reason and the tail for the screen", async () => {
+  it("does not hold back a message that looks cut off: the model is called", async () => {
     const half = demo.slice(0, demo.indexOf("3. The PO number")).trimEnd();
-    const err = await analyzeDispute(withMessage(half), never).catch((e) => e);
-    expect(err).toBeInstanceOf(MessageNotReady);
-    expect((err as MessageNotReady).verdict).toMatchObject({ status: "maybe_cut_off", tail: expect.stringContaining("working day.") });
-  });
-
-  it("lets the person go ahead anyway, but never past a blocked message", async () => {
-    const half = demo.slice(0, demo.indexOf("3. The PO number")).trimEnd();
-    await expect(analyzeDispute(withMessage(half), never, { proceedAnyway: true })).rejects.toThrow("the model must not be called");
-    await expect(analyzeDispute(withMessage(""), never, { proceedAnyway: true })).rejects.toBeInstanceOf(MessageNotReady);
+    await expect(analyzeDispute(withMessage(half), never)).rejects.toThrow("the model must not be called");
   });
 });

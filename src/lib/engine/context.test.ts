@@ -19,13 +19,13 @@ describe("what goes into the context", () => {
   const { payload } = ctx.snapshot;
 
   it("shows the buyer's active rules, high confidence first, then by corroboration", () => {
-    expect(payload.active_rules.map((r) => r.rule_id)).toEqual(["MER-R1", "MER-R3", "MER-R5", "MER-R6"]);
+    expect(payload.active_rules.map((r) => r.rule_id)).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R4"]);
     expect(payload.active_rules[0]!.confidence).toBe("high");
   });
 
   it("leaves out the rules the split held out, which have not been learned yet", () => {
     const ids = payload.active_rules.map((r) => r.rule_id);
-    for (const heldOut of ["MER-R2", "MER-R4"]) expect(ids).not.toContain(heldOut);
+    for (const heldOut of ["MER-R5", "MER-R6"]) expect(ids).not.toContain(heldOut);
   });
 
   it("drops other buyers' rules and disabled rules", () => {

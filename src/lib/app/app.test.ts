@@ -94,7 +94,7 @@ describe("pre-send view on the demo ledger", () => {
 
   it("opens the October draft with two decisions and two fixes already made", () => {
     const v = buildPresendView("INV-2026-0863");
-    expect(v.needs.map((n) => n.rule_id)).toEqual(["MER-R5", "MER-R6"]);
+    expect(v.needs.map((n) => n.rule_id)).toEqual(["MER-R3", "MER-R4"]);
     expect(v.verdict.tone).toBe("hold");
     expect(v.handled[0]).toMatchObject({ kind: "formats" });
     expect(v.sendable).toBe(false);
@@ -106,8 +106,8 @@ describe("pre-send view on the demo ledger", () => {
   it("proposes quantities from the annexure, never a typed amount", () => {
     const w = workingDraft("INV-2026-0863");
     const report = buildPreSendReport({ invoice: w.current.invoice, buyer: w.buyer, annexure: w.current.annexure }, w.rules);
-    const ot = report.business.find((i) => i.finding.rule_id === "MER-R5")!;
-    const p = proposeFor(ot, w.rules.find((r) => r.rule_id === "MER-R5"), w.current)!;
+    const ot = report.business.find((i) => i.finding.rule_id === "MER-R3")!;
+    const p = proposeFor(ot, w.rules.find((r) => r.rule_id === "MER-R3"), w.current)!;
     expect(p.primary).toBe("Hold OT");
     expect(p.calls.every((c) => c.tool === "adjust_line" && c.value === 0)).toBe(true);
     // And the engine accepts them only as the merchant.
@@ -118,14 +118,14 @@ describe("pre-send view on the demo ledger", () => {
     const before = buildPresendView("INV-2026-0863");
     const w = workingDraft("INV-2026-0863");
     const report = buildPreSendReport({ invoice: w.current.invoice, buyer: w.buyer, annexure: w.current.annexure }, w.rules);
-    const item = report.business.find((i) => i.finding.rule_id === "MER-R5")!;
-    const p = proposeFor(item, w.rules.find((r) => r.rule_id === "MER-R5"), w.current)!;
+    const item = report.business.find((i) => i.finding.rule_id === "MER-R3")!;
+    const p = proposeFor(item, w.rules.find((r) => r.rule_id === "MER-R3"), w.current)!;
     saveRecord("INV-2026-0863", {
-      approved: [{ rule_id: "MER-R5", title: p.title, resolved: p.resolved, note: p.note, line_ids: ["L9", "L10", "L11"], calls: p.calls, wage_cut: 0, total_cut: 0, at: "2026-10-11" }],
+      approved: [{ rule_id: "MER-R3", title: p.title, resolved: p.resolved, note: p.note, line_ids: ["L9", "L10", "L11"], calls: p.calls, wage_cut: 0, total_cut: 0, at: "2026-10-11" }],
     });
     expect(loadRecord("INV-2026-0863").approved).toHaveLength(1);
     const after = buildPresendView("INV-2026-0863");
-    expect(after.needs.map((n) => n.rule_id)).toEqual(["MER-R6"]);
+    expect(after.needs.map((n) => n.rule_id)).toEqual(["MER-R4"]);
     expect(after.now.total).toBeLessThan(before.now.total);
     expect(after.held!.wages).toBe(23085);
   });

@@ -20,11 +20,9 @@ export type AnalyzeResponse =
   | { ok: true }
   | {
       ok: false;
-      /** blocked: change the text. cut_off: add the rest, or analyse anyway. failed: the agent could not answer. */
-      kind: "blocked" | "cut_off" | "failed" | "resolved";
+      /** blocked: change the text. failed: the agent could not answer. resolved: nothing left to analyse. */
+      kind: "blocked" | "failed" | "resolved";
       message: string;
-      /** The last words the agent read, for cut_off. */
-      tail?: string;
       detail?: string[];
       transient?: boolean;
     };
@@ -42,6 +40,15 @@ export function receivedOn(message: string, now: Date = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
 
+/**
+ * ANALYZE_RECEIVED_ON=YYYY-MM-DD fixes the date the message counts as received. The date is part of the prompt,
+ * so without this a recording only replays on the day it was made. The demo pins it to the day of the story.
+ */
+function pinnedReceivedOn(): string | null {
+  const pinned = process.env.ANALYZE_RECEIVED_ON;
+  return pinned && /^\d{4}-\d{2}-\d{2}$/.test(pinned) ? pinned : null;
+}
+
 function providerFromEnv(): LlmProvider {
   const replay = process.env.ANALYZE_REPLAY;
   if (replay) return new ReplayProvider(replay);
@@ -50,8 +57,11 @@ function providerFromEnv(): LlmProvider {
   return record ? new RecordingProvider(live, record) : live;
 }
 
-export async function analyseMessage(invoiceId: string, message: string, opts: { proceed?: boolean } = {}): Promise<AnalyzeResponse> {
+export async function analyseMessage(invoiceId: string, rawMessage: string): Promise<AnalyzeResponse> {
   loadLocalEnv();
+  // A browser sends a textarea's line breaks as CRLF. Read the message as the file would, so the same email
+  // is the same prompt whichever way it arrives (and a recorded reply still matches it).
+  const message = rawMessage.replace(/\r\n?/g, "\n").trim();
   if (loadAnalysis(invoiceId)?.resolved)
     return { ok: false, kind: "resolved", message: "This dispute is already resolved. Reset the demo to run it again." };
 
@@ -65,12 +75,12 @@ export async function analyseMessage(invoiceId: string, message: string, opts: {
     rules: loadLedger(),
     disputes: loadAllDisputes(),
     message,
-    receivedOn: receivedOn(message),
+    receivedOn: pinnedReceivedOn() ?? receivedOn(message),
     systemPrompt: loadPrompt("analyze.md"),
   };
 
   try {
-    const result = await analyzeDispute(input, providerFromEnv(), { proceedAnyway: opts.proceed });
+    const result = await analyzeDispute(input, providerFromEnv());
     // The inspectable record of what the agent looked at, as the CLI keeps it.
     const runId = new Date().toISOString().replace(/[:.]/g, "-");
     writeRunArtifact(runId, "context.json", assembleContext(input).snapshot);
@@ -78,12 +88,7 @@ export async function analyseMessage(invoiceId: string, message: string, opts: {
     saveAnalysis(invoiceId, { saved_at: new Date().toISOString(), result });
     return { ok: true };
   } catch (err) {
-    if (err instanceof MessageNotReady) {
-      const v = err.verdict;
-      return v.status === "maybe_cut_off"
-        ? { ok: false, kind: "cut_off", message: v.message, tail: v.tail }
-        : { ok: false, kind: "blocked", message: v.message };
-    }
+    if (err instanceof MessageNotReady) return { ok: false, kind: "blocked", message: err.verdict.message };
     if (err instanceof AnalysisError)
       return { ok: false, kind: "failed", message: "The agent's answer did not pass the engine's checks, so none of it was used.", detail: err.problems };
     if (err instanceof LlmError)

@@ -36,10 +36,10 @@ describe("overrides are kept between runs", () => {
     const report = buildPreSendReport({ invoice, buyer: getBuyer(invoice.buyer_id), annexure: loadAnnexure(invoice.invoice_id) }, loadLedger());
     expect(loadOverrides()).toEqual([]);
 
-    saveOverrides(recordOverride([], report, { rule_id: "MER-R5", reason: "verbal approval" }).overrides);
+    saveOverrides(recordOverride([], report, { rule_id: "MER-R3", reason: "verbal approval" }).overrides);
     const back = loadOverrides();
     expect(back).toHaveLength(1);
-    expect(back[0]).toMatchObject({ rule_id: "MER-R5", reason: "verbal approval", invoice_id: "INV-2026-0863" });
+    expect(back[0]).toMatchObject({ rule_id: "MER-R3", reason: "verbal approval", invoice_id: "INV-2026-0863" });
     expect(applyOverrides(report, back).overridden).toHaveLength(1);
 
     resetState(DEMO_SEED);
@@ -67,7 +67,7 @@ describe("saying no to the business proposals in a dispute", () => {
   it("does not count a declined claim as proof that its rule was right", () => {
     const { input, result } = run();
     const r = applyApprovals(result, state(input), { approve_claims: [], approve_rules: [] });
-    expect(r.corroborated.map((c) => c.rule_id)).toEqual(["MER-R1", "MER-R3"]); // the two format rules, not MER-R5 or MER-R6
+    expect(r.corroborated.map((c) => c.rule_id)).toEqual(["MER-R1", "MER-R2"]); // the two format rules, not MER-R3 or MER-R4
   });
 
   it("writes the reason onto the dispute record when one is given", () => {

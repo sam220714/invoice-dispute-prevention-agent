@@ -297,5 +297,5 @@ export function readMessageFile(path: string): string {
   if (full.split(/[\\/]+/).some((seg) => seg.toLowerCase() === ANSWER_KEY_DIR)) {
     throw new Error(`refusing to read the answer key: ${path}`);
   }
-  return readFileSync(full, "utf-8");
+  return readFileSync(full, "utf-8").replace(/\r\n?/g, "\n").trim();
 }

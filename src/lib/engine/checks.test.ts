@@ -44,26 +44,26 @@ describe("Meridian, September (the demo invoice, INV-2026-0847)", () => {
   const results = run("INV-2026-0847");
 
   it("fails exactly the rules the dispute was about, and passes the portal window", () => {
-    expect(byOutcome(results, "fail")).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R5", "MER-R6"]);
-    expect(byOutcome(results, "pass")).toEqual(["MER-R4"]);
+    expect(byOutcome(results, "fail")).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R4", "MER-R5"]);
+    expect(byOutcome(results, "pass")).toEqual(["MER-R6"]);
   });
 
   it("routes each failure by bucket to the right autonomy level", () => {
     const f = (id: string) => find(results, id).finding!;
-    expect(f("MER-R5").autonomy).toBe("propose_merchant_approves");
-    expect(f("MER-R6").autonomy).toBe("propose_merchant_approves");
+    expect(f("MER-R3").autonomy).toBe("propose_merchant_approves");
+    expect(f("MER-R4").autonomy).toBe("propose_merchant_approves");
     expect(f("MER-R1").autonomy).toBe("auto_apply");
-    expect(f("MER-R2").autonomy).toBe("auto_apply");
+    expect(f("MER-R5").autonomy).toBe("auto_apply");
   });
 
   it("OT: 146 hours unreferenced, on the Shamshabad and Patancheru lines only", () => {
-    const f = find(results, "MER-R5").finding!;
+    const f = find(results, "MER-R3").finding!;
     expect(f.facts.unreferenced_hours).toBe(146);
     expect(f.line_ids).toEqual(["L9", "L11"]); // Medchal's 40 hours are all authorised
   });
 
   it("exits: 20 man-days over, on the Shamshabad loader line only", () => {
-    const f = find(results, "MER-R6").finding!;
+    const f = find(results, "MER-R4").finding!;
     expect(f.facts.excess_man_days).toBe(20);
     expect(f.line_ids).toEqual(["L6"]);
     expect(f.facts.workers).toEqual([
@@ -73,7 +73,7 @@ describe("Meridian, September (the demo invoice, INV-2026-0847)", () => {
   });
 
   it("grouping: the lines are role-wise, so every site is split across the invoice", () => {
-    const f = find(results, "MER-R2").finding!;
+    const f = find(results, "MER-R5").finding!;
     expect(f.facts.interleaved_sites).toEqual(["Shamshabad Hub", "Medchal DC", "Patancheru Yard"]);
   });
 
@@ -87,17 +87,17 @@ describe("Meridian, October draft (the pre-send check target, INV-2026-0863)", (
   const results = run("INV-2026-0863");
 
   it("catches the same defects September was disputed for", () => {
-    expect(byOutcome(results, "fail")).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R5", "MER-R6"]);
+    expect(byOutcome(results, "fail")).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R4", "MER-R5"]);
   });
 
   it("OT: all 171 hours are unreferenced, on all three site lines", () => {
-    const f = find(results, "MER-R5").finding!;
+    const f = find(results, "MER-R3").finding!;
     expect(f.facts.unreferenced_hours).toBe(171);
     expect(f.line_ids).toEqual(["L9", "L10", "L11"]);
   });
 
   it("exits: 25 man-days over (17 + 8)", () => {
-    expect(find(results, "MER-R6").finding!.facts.excess_man_days).toBe(25);
+    expect(find(results, "MER-R4").finding!.facts.excess_man_days).toBe(25);
   });
 });
 
@@ -187,7 +187,7 @@ describe("runChecks edge cases", () => {
   it("reports 'cannot verify' rather than passing when the annexure is missing", () => {
     const ctx = { ...ctxFor(getInvoice("INV-2026-0863")), annexure: null };
     const results = runChecks(ctx, pool);
-    for (const id of ["MER-R5", "MER-R6"]) {
+    for (const id of ["MER-R3", "MER-R4"]) {
       const r = find(results, id);
       expect(r.outcome).toBe("manual");
       expect(r.note).toContain("cannot be verified");

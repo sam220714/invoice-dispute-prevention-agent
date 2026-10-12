@@ -57,7 +57,7 @@ describe("processAnalysis on the demo reply", () => {
   it("says four of five were foreseeable, and that the linter would have caught them", () => {
     expect(result.foreseen).toMatchObject({ matched: 4, total: 5 });
     expect(result.outcomes.filter((o) => o.foresight?.linter_flagged)).toHaveLength(4);
-    expect(result.foreseen.rule_ids).toEqual(["MER-R1", "MER-R3", "MER-R5", "MER-R6"]);
+    expect(result.foreseen.rule_ids).toEqual(["MER-R1", "MER-R2", "MER-R3", "MER-R4"]);
   });
 
   it("verifies every quantity against the annexure", () => {
@@ -91,7 +91,7 @@ describe("a claim the tools cannot act on", () => {
 
   it("still counts as foreseeable, because the rule it matched still stands", () => {
     const result = withHuman();
-    expect(result.outcomes[1]!.foresight?.rule_id).toBe("MER-R6");
+    expect(result.outcomes[1]!.foresight?.rule_id).toBe("MER-R4");
     expect(result.foreseen).toMatchObject({ matched: 4, total: 5 });
   });
 

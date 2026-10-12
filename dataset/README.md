@@ -119,8 +119,8 @@ corroborate it), `learned_from`, `status`, `times_corroborated`.
 **The app never feeds the pool to the model.** It splits it with a random seed
 (`src/lib/data/split.ts`): 12 rules go into the context as the live ledger, and the rest
 are held out as things the agent has yet to learn. The same seed always gives the same
-split. `DEMO_SEED` (396) holds out MER-R2 (site-wise grouping), MER-R4 (the 1st–5th portal
-window) and YOG-R5, so the demo dispute teaches two new Meridian rules. Any other seed
+split. `DEMO_SEED` (469) holds out MER-R5 (site-wise grouping), MER-R6 (the 1st–5th portal
+window) and YOG-R6, so the demo dispute teaches two new Meridian rules. Any other seed
 (`LEDGER_SEED=7`, `--seed 7`) gives a different, equally repeatable test.
 
 The live copy is `state/rule_ledger.json`, which the app mutates. The pool itself is

@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { approveFinding, undoDecision, waiveFinding } from "../actions";
 import { plural, rupees } from "../../lib/app/format";
 import type { HandledView, NeedView, PresendView } from "../../lib/app/presend_view";
-import { activate, Call, Id, Sources, type Touch } from "./bits";
+import { activate, Id, type Touch } from "./bits";
 import { InvoicePanel } from "./InvoicePanel";
 
 type Key = string;
@@ -140,7 +140,6 @@ export function PresendBoard({ view }: { view: PresendView }) {
               )}
 
               <div className="more" hidden={open !== key}>
-                <Call calls={n.calls} />
                 {n.names.length > 0 && (
                   <ul className="names">
                     {n.names.map((w) => (
@@ -150,7 +149,7 @@ export function PresendBoard({ view }: { view: PresendView }) {
                 )}
                 <p className="rule">{n.rule}</p>
                 <p className="from">
-                  Learned from <Sources sources={n.sources} /> · rule <Id>{n.rule_id}</Id> · seen {plural(n.corroborated, "time")}, {n.confidence} confidence
+                  Learned from <Id>{n.rule_id}</Id>
                 </p>
               </div>
             </article>

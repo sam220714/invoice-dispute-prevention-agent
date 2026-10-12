@@ -95,7 +95,7 @@ export type AnalyzeState = { response: AnalyzeResponse | null; text: string };
 /** Form action for the paste box. Redirects to the analysis on success. */
 export async function analyzeAction(invoiceId: string, _prev: AnalyzeState, form: FormData): Promise<AnalyzeState> {
   const text = String(form.get("message") ?? "");
-  const response = await analyseMessage(invoiceId, text, { proceed: form.get("proceed") === "1" });
+  const response = await analyseMessage(invoiceId, text);
   if (!response.ok) return { response, text };
   refresh();
   redirect(`/invoices/${invoiceId}/dispute`);

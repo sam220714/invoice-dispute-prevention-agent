@@ -16,7 +16,6 @@ import { renderAnalysis, renderReport, renderResolution } from "./render";
 //                    [--context] [--record NAME | --replay NAME] [--json]
 //                    [--approve all|C1,C2] [--save] [--next INVOICE_ID] [--reset]
 //   --context   print what the agent would look at, and stop. No API call.
-//   --proceed   analyse a message that looks cut off (an empty or oversized one is always refused)
 //   --record    call the live model and save the reply as a fixture
 //   --replay    answer from a saved fixture, offline
 //   --approve   approve business claims (and every proposed rule), then show the revised invoice
@@ -73,7 +72,7 @@ async function main() {
   }
 
   const started = Date.now();
-  const result = await analyzeDispute(input, provider, { proceedAnyway: has("proceed") });
+  const result = await analyzeDispute(input, provider);
   const { meta } = result;
   writeRunArtifact(runId, "analysis.json", result);
   const timing = `${((Date.now() - started) / 1000).toFixed(1)}s | tokens in ${meta.usage.input} out ${meta.usage.output} thinking ${meta.usage.thinking}`;
@@ -117,9 +116,7 @@ async function main() {
 
 main().catch((err) => {
   if (err instanceof MessageNotReady) {
-    console.error(`analyze: ${err.message}`);
-    console.error(`  the agent would have read up to: "${err.verdict.status === "maybe_cut_off" ? err.verdict.tail : ""}"`);
-    if (err.verdict.status === "maybe_cut_off") console.error("  add the rest, or re-run with --proceed to analyse what is here. Nothing was sent to the model.");
+    console.error(`analyze: ${err.message} Nothing was sent to the model.`);
   } else if (err instanceof AnalysisError) {
     console.error(`analyze: ${err.message}`);
     for (const p of err.problems) console.error(`  - ${p}`);

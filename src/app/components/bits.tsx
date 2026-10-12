@@ -1,27 +1,5 @@
 import type { KeyboardEvent, ReactNode } from "react";
-import type { DisplayCall, Source } from "../../lib/app/presend_view";
-
-/** A tool call as the agent would write it. Machine identifiers are the only mono text on screen. */
-export function Call({ calls }: { calls: DisplayCall[] }) {
-  if (!calls.length) return null;
-  return (
-    <p className="call">
-      {calls.map((c, i) => (
-        <span key={i}>
-          {i > 0 && <br />}
-          {c.tool}(
-          {c.args.map((a, j) => (
-            <span key={j}>
-              {j > 0 && ", "}
-              <span className="arg">{typeof a === "number" ? a : `"${a}"`}</span>
-            </span>
-          ))}
-          )
-        </span>
-      ))}
-    </p>
-  );
-}
+import type { Source } from "../../lib/app/presend_view";
 
 export const Id = ({ children }: { children: ReactNode }) => <span className="id">{children}</span>;
 

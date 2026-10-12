@@ -5,7 +5,7 @@ import { ToolCallSchema } from "./tools";
 const otCall = { tool: "adjust_line", line_id: "L9", field: "qty", value: 0, reason: "no authorisation at this site" };
 const claim = (over: Record<string, unknown> = {}) => ({
   claim_id: "C1", claim: "Overtime is not authorised", quote: "Kindly remove the unauthorised portion.",
-  bucket: "business", target: "lines", line_ids: ["L9"], matched_rule_id: "MER-R5",
+  bucket: "business", target: "lines", line_ids: ["L9"], matched_rule_id: "MER-R3",
   match_rationale: "The rule says unreferenced OT is struck off.", proposed_calls: [otCall], confidence: "high", ...over,
 });
 const analysis = (over: Record<string, unknown> = {}) => ({ claims: [claim()], new_rules: [], unclear: [], ...over });
@@ -63,7 +63,7 @@ describe("bucket and tool must agree", () => {
 
 describe("a claim the tools cannot act on", () => {
   it("stays a claim, keeps its matched rule, and carries no calls", () => {
-    const c = ClaimSchema.safeParse(claim({ needs_human: true, proposed_calls: [], matched_rule_id: "YOG-R5" }));
+    const c = ClaimSchema.safeParse(claim({ needs_human: true, proposed_calls: [], matched_rule_id: "YOG-R6" }));
     expect(c.success).toBe(true);
   });
 

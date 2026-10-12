@@ -16,18 +16,6 @@
     "rule_id": "MER-R2",
     "buyer_id": "BUY-MERIDIAN",
     "type": "format",
-    "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
-    "confidence": "medium",
-    "learned_from": [
-      "DSP-007"
-    ],
-    "status": "active",
-    "times_corroborated": 1
-  },
-  {
-    "rule_id": "MER-R3",
-    "buyer_id": "BUY-MERIDIAN",
-    "type": "format",
     "rule": "SAC 998519 must appear on every line, not once in the header.",
     "confidence": "medium",
     "learned_from": [
@@ -37,19 +25,7 @@
     "times_corroborated": 1
   },
   {
-    "rule_id": "MER-R4",
-    "buyer_id": "BUY-MERIDIAN",
-    "type": "format",
-    "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.",
-    "confidence": "medium",
-    "learned_from": [
-      "DSP-006"
-    ],
-    "status": "active",
-    "times_corroborated": 1
-  },
-  {
-    "rule_id": "MER-R5",
+    "rule_id": "MER-R3",
     "buyer_id": "BUY-MERIDIAN",
     "type": "business",
     "rule": "Overtime is payable only against a Meridian OT authorisation number issued by the site manager. Unreferenced OT is struck off.",
@@ -61,13 +37,37 @@
     "times_corroborated": 1
   },
   {
-    "rule_id": "MER-R6",
+    "rule_id": "MER-R4",
     "buyer_id": "BUY-MERIDIAN",
     "type": "business",
     "rule": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.",
     "confidence": "medium",
     "learned_from": [
       "DSP-008"
+    ],
+    "status": "active",
+    "times_corroborated": 1
+  },
+  {
+    "rule_id": "MER-R5",
+    "buyer_id": "BUY-MERIDIAN",
+    "type": "format",
+    "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
+    "confidence": "medium",
+    "learned_from": [
+      "DSP-007"
+    ],
+    "status": "active",
+    "times_corroborated": 1
+  },
+  {
+    "rule_id": "MER-R6",
+    "buyer_id": "BUY-MERIDIAN",
+    "type": "format",
+    "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.",
+    "confidence": "medium",
+    "learned_from": [
+      "DSP-006"
     ],
     "status": "active",
     "times_corroborated": 1
@@ -123,11 +123,11 @@
   {
     "rule_id": "YOG-R5",
     "buyer_id": "BUY-YOGITA",
-    "type": "business",
-    "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
+    "type": "format",
+    "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.",
     "confidence": "medium",
     "learned_from": [
-      "DSP-012"
+      "DSP-013"
     ],
     "status": "active",
     "times_corroborated": 1
@@ -135,11 +135,11 @@
   {
     "rule_id": "YOG-R6",
     "buyer_id": "BUY-YOGITA",
-    "type": "format",
-    "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.",
+    "type": "business",
+    "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
     "confidence": "medium",
     "learned_from": [
-      "DSP-013"
+      "DSP-012"
     ],
     "status": "active",
     "times_corroborated": 1

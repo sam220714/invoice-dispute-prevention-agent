@@ -16,16 +16,16 @@ import type { Check } from "../schema";
 export const RULE_CHECKS: Record<string, Check> = {
   // Meridian
   "MER-R1": { kind: "line_field_required", field: "po_number" },
-  "MER-R2": { kind: "lines_grouped_by", field: "site_code" },
-  "MER-R3": { kind: "line_field_required", field: "sac" },
-  "MER-R4": { kind: "invoice_date_window", from_day: 1, to_day: 5 },
-  "MER-R5": {
+  "MER-R5": { kind: "lines_grouped_by", field: "site_code" },
+  "MER-R2": { kind: "line_field_required", field: "sac" },
+  "MER-R6": { kind: "invoice_date_window", from_day: 1, to_day: 5 },
+  "MER-R3": {
     kind: "annexure_field_required_when",
     field: "ot_auth_ref",
     when_field: "ot_hours",
     when_gt: 0,
   },
-  "MER-R6": { kind: "days_billed_capped_by_last_working_day" },
+  "MER-R4": { kind: "days_billed_capped_by_last_working_day" },
 
   // Yogita
   "YOG-R1": {
@@ -38,11 +38,11 @@ export const RULE_CHECKS: Record<string, Check> = {
     note: "Overtime above 1.5x needs a written plant-head approval number. The invoice carries no approval field to test.",
   },
   "YOG-R4": { kind: "service_charge_base", expected: "wages_only" },
-  "YOG-R5": {
+  "YOG-R6": {
     kind: "manual_review",
     note: "Absences of more than 3 consecutive days are not billable. Daily attendance is not in the invoice data.",
   },
-  "YOG-R6": {
+  "YOG-R5": {
     kind: "manual_review",
     note: "The annexure must use Yogita's own Excel template (gate ID, shift). Column layout is not modelled.",
   },

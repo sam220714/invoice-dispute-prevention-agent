@@ -30,15 +30,9 @@ export function PasteBox({ invoiceId, buyer, rules, lines, sample, draft }: Prop
       </div>
 
       {r && !pending && (
-        <div className={`banner${r.kind === "cut_off" ? " warn" : ""}`} role="alert">
+        <div className="banner" role="alert">
           <p>{r.message}</p>
-          {r.kind === "cut_off" && r.tail && <p className="tail">The agent would have read up to: &ldquo;{r.tail}&rdquo;</p>}
           {r.detail && r.detail.length > 0 && <ul>{r.detail.slice(0, 5).map((d, i) => <li key={i}>{d}</li>)}</ul>}
-          {r.kind === "cut_off" && (
-            <div className="acts">
-              <button className="btn" type="submit" form="paste-form" name="proceed" value="1">Analyse what is here</button>
-            </div>
-          )}
         </div>
       )}
 

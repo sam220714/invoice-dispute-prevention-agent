@@ -39,7 +39,7 @@ const flag = (name: string) => {
 const has = (name: string) => args.includes(`--${name}`);
 
 /** The same three held out as the classifier eval, for the single-dispute cases. */
-const HOLD = ["MER-R4", "YOG-R2", "TEA-R2"];
+const HOLD = ["MER-R6", "YOG-R2", "TEA-R2"];
 
 interface Case {
   label: string;

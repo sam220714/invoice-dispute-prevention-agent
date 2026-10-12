@@ -63,7 +63,7 @@ describe("the prompt the model actually receives, on the demo seed", () => {
   it("does not contain the expected answers", () => {
     for (const c of expected.claims) {
       expect(sent).not.toContain(norm(c.proposed_fix));
-      // "MER-R5 (DSP-004) - OT requires ..." : the id is ordinary provenance in the ledger; the prose is the answer.
+      // "MER-R3 (DSP-004) - OT requires ..." : the id is ordinary provenance in the ledger; the prose is the answer.
       const prose = c.matches_existing_rule?.split(/\s[—-]\s/)[1];
       if (prose) expect(sent).not.toContain(norm(prose));
     }
@@ -117,6 +117,6 @@ describe("reading a message from disk", () => {
   });
 
   it("reads the demo message", () => {
-    expect(readMessageFile("dataset/demo_dispute.txt")).toContain("Prashant Dubey");
+    expect(readMessageFile("dataset/demo_dispute.txt")).toContain("OT claimed is 186 hours");
   });
 });

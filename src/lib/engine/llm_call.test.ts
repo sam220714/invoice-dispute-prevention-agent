@@ -16,7 +16,7 @@ const call = { tool: "adjust_line", line_id: "L9", field: "qty", value: 0, reaso
 const good = (over: Record<string, unknown> = {}) => ({
   claims: [{
     claim_id: "C1", claim: "Overtime is not authorised", quote: "Kindly remove the unauthorised portion.",
-    bucket: "business", target: "lines", line_ids: ["L9"], matched_rule_id: "MER-R5",
+    bucket: "business", target: "lines", line_ids: ["L9"], matched_rule_id: "MER-R3",
     match_rationale: "Unreferenced overtime is struck off.", proposed_calls: [call], confidence: "high", ...over,
   }],
   new_rules: [], unclear: [],
@@ -56,7 +56,7 @@ describe("parseAnalysis", () => {
   });
 
   it("rejects a matched rule that is not an active rule for this buyer", () => {
-    for (const bad of ["MER-R99", "MER-R2", "YOG-R1"]) {
+    for (const bad of ["MER-R99", "MER-R5", "YOG-R1"]) {
       const r = parseAnalysis(text(good({ matched_rule_id: bad })), ctx);
       expect(!r.ok && r.problems.join(), bad).toContain("not an active rule");
     }
@@ -64,14 +64,14 @@ describe("parseAnalysis", () => {
 
   it("rejects a matched rule id that contradicts the model's own rationale", () => {
     const slip = parseAnalysis(
-      text(good({ matched_rule_id: "MER-R1", match_rationale: "Rule MER-R3 specifically covers SAC 998519." })),
+      text(good({ matched_rule_id: "MER-R1", match_rationale: "Rule MER-R2 specifically covers SAC 998519." })),
       ctx,
     );
-    expect(!slip.ok && slip.problems.join()).toContain("talks about MER-R3; make them agree");
+    expect(!slip.ok && slip.problems.join()).toContain("talks about MER-R2; make them agree");
   });
 
   it("lets a rationale name the matched rule, alone or beside others", () => {
-    for (const why of ["MER-R5 covers this.", "Unlike MER-R1, MER-R5 is about overtime.", "Unreferenced overtime is struck off."]) {
+    for (const why of ["MER-R3 covers this.", "Unlike MER-R1, MER-R3 is about overtime.", "Unreferenced overtime is struck off."]) {
       expect(parseAnalysis(text(good({ match_rationale: why })), ctx).ok, why).toBe(true);
     }
   });

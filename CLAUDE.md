@@ -194,7 +194,7 @@ Everything lives in `dataset/` — see `dataset/README.md` for the full guide.
 - 15 historical disputes, business and format.
 - `dataset/rule_ledger.json` is a **pool of 15 rules**. A seeded split (`src/lib/data/split.ts`)
   puts 12 into the agent's context and holds the rest out, so there is always something
-  genuinely new to learn. The same seed gives the same split. `DEMO_SEED` (396) is the one
+  genuinely new to learn. The same seed gives the same split. `DEMO_SEED` (469) is the one
   the demo runs on; `LEDGER_SEED=N` or `--seed N` tries another.
 - **v1 data is deliberately simple:** no cost centres, employee codes, supervisor roles or
   attachments, and every line is complete. Overtime has one line per site.

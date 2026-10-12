@@ -33,9 +33,9 @@
     ],
     "expected_rule_text": "Overtime is payable only against a Meridian OT authorisation number issued by the site manager.",
     "expected_rule_type": "business",
-    "maps_to_rule_id": "MER-R5",
+    "maps_to_rule_id": "MER-R3",
     "maps_to_rule_ids": [
-      "MER-R5"
+      "MER-R3"
     ]
   },
   {
@@ -46,10 +46,10 @@
     ],
     "expected_rule_text": "SAC 998519 must appear on every line, and invoices are only accepted on the portal between the 1st and 5th.",
     "expected_rule_type": "format",
-    "maps_to_rule_id": "MER-R3",
+    "maps_to_rule_id": "MER-R2",
     "maps_to_rule_ids": [
-      "MER-R3",
-      "MER-R4"
+      "MER-R2",
+      "MER-R6"
     ]
   },
   {
@@ -60,9 +60,9 @@
     ],
     "expected_rule_text": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.",
     "expected_rule_type": "format",
-    "maps_to_rule_id": "MER-R2",
+    "maps_to_rule_id": "MER-R5",
     "maps_to_rule_ids": [
-      "MER-R2"
+      "MER-R5"
     ]
   },
   {
@@ -73,9 +73,9 @@
     ],
     "expected_rule_text": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.",
     "expected_rule_type": "business",
-    "maps_to_rule_id": "MER-R6",
+    "maps_to_rule_id": "MER-R4",
     "maps_to_rule_ids": [
-      "MER-R6"
+      "MER-R4"
     ]
   },
   {
@@ -126,9 +126,9 @@
     ],
     "expected_rule_text": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.",
     "expected_rule_type": "business",
-    "maps_to_rule_id": "YOG-R5",
+    "maps_to_rule_id": "YOG-R6",
     "maps_to_rule_ids": [
-      "YOG-R5"
+      "YOG-R6"
     ]
   },
   {
@@ -139,9 +139,9 @@
     ],
     "expected_rule_text": "The annexure must use Yogita's own Excel template with gate ID and shift columns.",
     "expected_rule_type": "format",
-    "maps_to_rule_id": "YOG-R6",
+    "maps_to_rule_id": "YOG-R5",
     "maps_to_rule_ids": [
-      "YOG-R6"
+      "YOG-R5"
     ]
   },
   {

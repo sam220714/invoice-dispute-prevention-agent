@@ -33,9 +33,9 @@ export function SentInvoice({ view, chip, total, raised, disputable }: Props) {
           <div className="flag">{FLAG[chip]}</div>
           <h2>{HEADLINE[chip](view.buyer_short)}</h2>
           <p className="sub">Dated {shortDate(view.invoice_date, true)}.</p>
-          {disputable && (
+          {disputable && (raised || chip === "revised") && (
             <Link className="btn pri go-link" href={`/invoices/${view.invoice_id}/dispute`} style={{ marginTop: 14 }}>
-              {raised ? "Review the dispute" : chip === "revised" ? "See the dispute" : `Paste ${view.buyer_short}'s message`}
+              {raised ? "Review the dispute" : "See the dispute"}
             </Link>
           )}
         </div>

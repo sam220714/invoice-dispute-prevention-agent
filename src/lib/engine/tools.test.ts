@@ -13,7 +13,7 @@ import {
   type ToolResult,
 } from "./tools";
 
-// The ledger the demo starts from: MER-R1 (PO per line) and MER-R3 (SAC per line) are in it.
+// The ledger the demo starts from: MER-R1 (PO per line) and MER-R2 (SAC per line) are in it.
 const seed = loadSplit(DEMO_SEED).context;
 
 /** Rules that are not in the demo ledger yet, built by hand to exercise the tools. */
@@ -310,7 +310,7 @@ describe("format tools", () => {
 
     it("fixes everything an invoice edit can fix", () => {
       expect(r.result.ok).toBe(true);
-      for (const id of ["MER-R1", "MER-R3", "T-GROUP"]) expect(outcome(id).outcome, id).toBe("pass");
+      for (const id of ["MER-R1", "MER-R2", "T-GROUP"]) expect(outcome(id).outcome, id).toBe("pass");
     });
 
     it("leaves nothing for a person once every format rule is mechanical", () => {
@@ -319,7 +319,7 @@ describe("format tools", () => {
     });
 
     it("does not touch the business findings", () => {
-      for (const id of ["MER-R5", "MER-R6"]) expect(outcome(id).outcome).toBe("fail");
+      for (const id of ["MER-R3", "MER-R4"]) expect(outcome(id).outcome).toBe("fail");
     });
 
     it("never changes a rupee: format fixes are not billing changes", () => {

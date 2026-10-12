@@ -2,7 +2,7 @@ import { getBuyer, getInvoice, loadAllDisputes, loadInvoices } from "../data/loa
 import type { AnalysisResult, ClaimOutcome } from "../engine/analyze";
 import { applyToolCall, type Draft, type ToolCall } from "../engine/tools";
 import type { Invoice } from "../schema";
-import { compactLines, firstName, shortDate } from "./format";
+import { compactLines, shortDate } from "./format";
 import { displayCall, siteLabels, type DisplayCall, type Source, type TotalsView } from "./presend_view";
 import { segmentMessage, type Segment } from "./quotes";
 import { loadAnalysis, type ResolvedRecord } from "./store";
@@ -96,7 +96,6 @@ export interface ResolvedView {
 export interface AnalysisView {
   invoice_id: string;
   buyer_short: string;
-  buyer_contact: string;
   received_on: string;
   message: string;
   segments: Segment[];
@@ -286,7 +285,6 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
   return {
     invoice_id: invoiceId,
     buyer_short: buyer.short_name,
-    buyer_contact: firstName(buyer.ap_contact),
     received_on: result.received_on,
     message: display,
     segments: segmentMessage(display, spans),

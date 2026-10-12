@@ -50,20 +50,20 @@ const analyse = () => {
 
 describe("dispute -> rule -> next invoice", () => {
   it("before: October's draft is not flagged for site-wise grouping", () => {
-    expect(loadLedger().some((r) => r.rule_id === "MER-R2")).toBe(false);
-    expect(october().format.map((i) => i.rule.rule_id)).not.toContain("MER-R2");
+    expect(loadLedger().some((r) => r.rule_id === "MER-R5")).toBe(false);
+    expect(october().format.map((i) => i.rule.rule_id)).not.toContain("MER-R5");
   });
 
   it("before: the ledger the demo starts from has 12 rules, and the three held out are unknown to it", () => {
     expect(loadLedger()).toHaveLength(12);
-    expect(loadLedger().map((r) => r.rule_id)).not.toEqual(expect.arrayContaining(["MER-R2"]));
+    expect(loadLedger().map((r) => r.rule_id)).not.toEqual(expect.arrayContaining(["MER-R5"]));
   });
 
   it("after the merchant approves, the rule is in the ledger and fires on the next invoice", () => {
     const result = analyse();
     const resolution = applyApprovals(result, { ledger: loadLedger(), disputes: loadAllDisputes() }, { approve_claims: ["C1", "C2"], approve_rules: "all" });
 
-    expect(resolution.written.map((r) => r.rule_id)).toEqual(["MER-R2", "MER-R4"]);
+    expect(resolution.written.map((r) => r.rule_id)).toEqual(["MER-R5", "MER-R6"]);
     expect(resolution.written.map((r) => r.confidence)).toEqual(["medium", "medium"]); // one dispute, one observation
     expect(resolution.dispute.dispute_id).toBe("DSP-019");
     expect(resolution.merchant_accepted).toBe(true);
@@ -72,23 +72,23 @@ describe("dispute -> rule -> next invoice", () => {
     recordOutcome(resolution.dispute, resolution.merchant_accepted);
 
     const report = october();
-    const hit = report.format.find((i) => i.rule.rule_id === "MER-R2");
-    expect(hit, "MER-R2 should flag INV-2026-0863").toBeDefined();
+    const hit = report.format.find((i) => i.rule.rule_id === "MER-R5");
+    expect(hit, "MER-R5 should flag INV-2026-0863").toBeDefined();
     expect(hit!.rule.learned_from).toEqual(["DSP-019"]);
     expect(report.foreseen_by).toContain("DSP-019");
   });
 
   it("the date window was learned too, and October's date honestly passes it", () => {
-    const r4 = loadLedger().find((r) => r.rule_id === "MER-R4")!;
+    const r4 = loadLedger().find((r) => r.rule_id === "MER-R6")!;
     expect(r4.check).toMatchObject({ kind: "invoice_date_window", from_day: 1, to_day: 5 });
-    expect(october().passed.map((p) => p.rule_id)).toContain("MER-R4");
+    expect(october().passed.map((p) => p.rule_id)).toContain("MER-R6");
   });
 
   it("rules the dispute repeated were corroborated, not duplicated", () => {
     const ledger = loadLedger();
-    for (const id of ["MER-R1", "MER-R3", "MER-R5", "MER-R6"])
+    for (const id of ["MER-R1", "MER-R2", "MER-R3", "MER-R4"])
       expect(ledger.find((r) => r.rule_id === id)!.learned_from).toContain("DSP-019");
-    expect(ledger.filter((r) => r.buyer_id === "BUY-MERIDIAN")).toHaveLength(6); // 4 in context + MER-R2 + MER-R4, nothing twice
+    expect(ledger.filter((r) => r.buyer_id === "BUY-MERIDIAN")).toHaveLength(6); // 4 in context + MER-R5 + MER-R6, nothing twice
     expect(new Set(ledger.map((r) => r.rule_id)).size).toBe(ledger.length);
   });
 
@@ -105,7 +105,7 @@ describe("dispute -> rule -> next invoice", () => {
     expect(r.declined).toEqual(["C1"]);
     expect(r.merchant_accepted).toBe(false);
     expect(r.written).toEqual([]);
-    expect(r.ledger.find((x) => x.rule_id === "MER-R5")!.learned_from).not.toContain("DSP-019");
+    expect(r.ledger.find((x) => x.rule_id === "MER-R3")!.learned_from).not.toContain("DSP-019");
     expect(r.invoice.lines.find((l) => l.line_id === "L9")!.qty).toBe(54);
     expect(r.invoice.lines.find((l) => l.line_id === "L6")!.qty).toBe(520);
   });

@@ -103,11 +103,11 @@ buyers = [
         ),
         "ground_truth_rules": [
             {"type": "format", "rule": "The PO number must be entered against every line item, not only in the invoice reference field.", "discovered": False},
-            {"type": "format", "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.", "discovered": False},
             {"type": "format", "rule": "SAC 998519 must appear on every line, not once in the header.", "discovered": False},
-            {"type": "format", "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.", "discovered": False},
             {"type": "business", "rule": "Overtime is payable only against a Meridian OT authorisation number issued by the site manager. Unreferenced OT is struck off.", "discovered": False},
             {"type": "business", "rule": "Workers who exit mid-month are billable only to their last working day; Meridian's gate system is the reference.", "discovered": False},
+            {"type": "format", "rule": "Lines must be grouped site-wise (Shamshabad, Medchal, Patancheru), not role-wise.", "discovered": False},
+            {"type": "format", "rule": "Invoices are only accepted on the portal between the 1st and 5th of the month. Later uploads sit unprocessed until the next window.", "discovered": False},
         ],
     },
     {
@@ -140,8 +140,8 @@ buyers = [
             {"type": "business", "rule": "Billing cycle runs 26th to 25th, not calendar month. Days after the 25th belong to the next invoice.", "discovered": False},
             {"type": "business", "rule": "Overtime above 1.5x requires prior written approval from the plant head, referenced by approval number.", "discovered": False},
             {"type": "business", "rule": "Service charge is computed on wages only, never on PF/ESI.", "discovered": False},
-            {"type": "business", "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.", "discovered": False},
             {"type": "format", "rule": "The annexure must be in Yogita's own Excel template with gate ID and shift columns.", "discovered": False},
+            {"type": "business", "rule": "A worker absent more than 3 consecutive days is not billable for those days even if on the muster.", "discovered": False},
         ],
     },
     {
@@ -616,13 +616,8 @@ disputes = [
 ]
 
 # ---------------------------------------------------------------- demo dispute
-demo_dispute = """From: Prashant Dubey <ap.vendors@meridianlogistics.in>
-To: Sunita Reddy <sunita@pragatimanpower.in>
-Cc: accounts.hyd@meridianlogistics.in
-Date: Mon, 6 Oct 2026, 7:42 PM
-Subject: RE: Invoice INV-2026-0847 - Sept 2026 - Pragati Facility & Manpower
-
-Dear Madam,
+# Pasted the way a person pastes a message from a phone: the body only, no sender, date or signature block.
+demo_dispute = """Dear Madam,
 
 We have reviewed the invoice and the following observations are there:
 
@@ -646,11 +641,6 @@ We have reviewed the invoice and the following observations are there:
 
 Please share the revised invoice at the earliest. Note that our portal
 accepts invoices only from 1st to 5th of the month.
-
-Regards,
-Prashant Dubey
-Accounts Payable
-Meridian Logistics Park Pvt Ltd
 """
 
 # ---------------------------------------------------------------- expected
@@ -658,7 +648,7 @@ Meridian Logistics Park Pvt Ltd
 # context is the DEMO split of the rule ledger (held out: see DEMO_HELD_OUT).
 # Used to measure the agent, and to keep the demo honest. The money is computed
 # here from the invoice itself, the same way the app's arithmetic engine does it.
-DEMO_HELD_OUT = ["MER-R2", "MER-R4", "YOG-R5"]
+DEMO_HELD_OUT = ["MER-R5", "MER-R6", "YOG-R6"]
 
 
 def _revised_demo_invoice():
@@ -689,7 +679,7 @@ expected_analysis = {
             "proposed_fix": "adjust_line(L9, qty, 0); adjust_line(L11, qty, 0)",
             "value_impact_inr": -19710,
             "autonomy": "propose_merchant_approves",
-            "matches_existing_rule": "MER-R5 (DSP-004) — OT requires a Meridian authorisation number",
+            "matches_existing_rule": "MER-R3 (DSP-004) — OT requires a Meridian authorisation number",
         },
         {
             "claim": "Two exited loaders billed for the full month",
@@ -698,7 +688,7 @@ expected_analysis = {
             "proposed_fix": "adjust_line(L6, qty, 520) — Shaik Imran 12 days and B. Rao 8 days removed",
             "value_impact_inr": -13600,
             "autonomy": "propose_merchant_approves",
-            "matches_existing_rule": "MER-R6 (DSP-008) — bill only to last working day per Meridian gate records",
+            "matches_existing_rule": "MER-R4 (DSP-008) — bill only to last working day per Meridian gate records",
         },
         {
             "claim": "PO number is not against the lines",
@@ -716,7 +706,7 @@ expected_analysis = {
             "proposed_fix": "set_field(sac) on every line",
             "value_impact_inr": 0,
             "autonomy": "auto_apply",
-            "matches_existing_rule": "MER-R3 (DSP-006)",
+            "matches_existing_rule": "MER-R2 (DSP-006)",
         },
         {
             "claim": "Lines are grouped role-wise; Meridian wants them site-wise",
@@ -729,8 +719,8 @@ expected_analysis = {
         },
     ],
     "new_rules_to_learn": [
-        {"rule_id": "MER-R2", "type": "format", "rule": "Lines must be grouped site-wise, not role-wise.", "note": "From claim 5. Earlier asked for in DSP-007."},
-        {"rule_id": "MER-R4", "type": "format", "rule": "Meridian's portal accepts invoices only between the 1st and 5th of the month.", "note": "From the closing remark, not a numbered claim. Earlier stated in DSP-006."},
+        {"rule_id": "MER-R5", "type": "format", "rule": "Lines must be grouped site-wise, not role-wise.", "note": "From claim 5. Earlier asked for in DSP-007."},
+        {"rule_id": "MER-R6", "type": "format", "rule": "Meridian's portal accepts invoices only between the 1st and 5th of the month.", "note": "From the closing remark, not a numbered claim. Earlier stated in DSP-006."},
     ],
     "wage_reduction_inr": _wage_cut,
     "revised_invoice_total_inr": _revised["totals"]["grand_total"],
@@ -745,7 +735,7 @@ expected_analysis = {
     ),
     "commentary": (
         "Four of the five claims match rules already learned from earlier disputes "
-        "(MER-R1, R3, R5, R6). The agent should say so explicitly — that is the "
+        "(MER-R1, R2, R3, R4). The agent should say so explicitly — that is the "
         "prevention argument: every one of these was foreseeable before the invoice "
         "was sent. The fifth claim and the closing remark are new rules to learn."
     ),
@@ -768,10 +758,10 @@ PREFIX = {"BUY-MERIDIAN": "MER", "BUY-YOGITA": "YOG", "BUY-TEAMLEASE": "TEA"}
 
 # Which historical dispute each ground-truth rule is recoverable from.
 RULE_SOURCE = {
-    "MER-R1": ["DSP-001", "DSP-002"], "MER-R2": ["DSP-007"], "MER-R3": ["DSP-006"],
-    "MER-R4": ["DSP-006"], "MER-R5": ["DSP-004"], "MER-R6": ["DSP-008"],
+    "MER-R1": ["DSP-001", "DSP-002"], "MER-R5": ["DSP-007"], "MER-R2": ["DSP-006"],
+    "MER-R6": ["DSP-006"], "MER-R3": ["DSP-004"], "MER-R4": ["DSP-008"],
     "YOG-R1": ["DSP-009"], "YOG-R2": ["DSP-009"], "YOG-R3": ["DSP-010"],
-    "YOG-R4": ["DSP-011"], "YOG-R5": ["DSP-012"], "YOG-R6": ["DSP-013"],
+    "YOG-R4": ["DSP-011"], "YOG-R6": ["DSP-012"], "YOG-R5": ["DSP-013"],
     "TEA-R1": ["DSP-015"], "TEA-R2": ["DSP-017"], "TEA-R3": ["DSP-018"],
 }
 

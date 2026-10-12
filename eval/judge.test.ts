@@ -29,30 +29,30 @@ describe("sameCheck", () => {
 
 describe("judgeExisting", () => {
   it("passes when some claim is matched to the expected rule", () => {
-    expect(judgeExisting(analysis([claim("C1", null), claim("C2", "MER-R5")]), "MER-R5").pass).toBe(true);
+    expect(judgeExisting(analysis([claim("C1", null), claim("C2", "MER-R3")]), "MER-R3").pass).toBe(true);
   });
   it("fails on a wrong match, and says what was matched", () => {
-    const v = judgeExisting(analysis([claim("C1", "MER-R6")]), "MER-R5");
+    const v = judgeExisting(analysis([claim("C1", "MER-R4")]), "MER-R3");
     expect(v.pass).toBe(false);
-    expect(v.reason).toContain("C1->MER-R6");
+    expect(v.reason).toContain("C1->MER-R4");
   });
   it("fails when nothing was matched, or there are no claims", () => {
-    expect(judgeExisting(analysis([claim("C1", null)]), "MER-R5").pass).toBe(false);
-    expect(judgeExisting(analysis([]), "MER-R5").pass).toBe(false);
+    expect(judgeExisting(analysis([claim("C1", null)]), "MER-R3").pass).toBe(false);
+    expect(judgeExisting(analysis([]), "MER-R3").pass).toBe(false);
   });
 });
 
 describe("judgeNewRule", () => {
-  const opts = { expectedCheck: WINDOW, allowedMatches: new Set(["MER-R3"]) };
+  const opts = { expectedCheck: WINDOW, allowedMatches: new Set(["MER-R2"]) };
 
   it("passes when the expected check is proposed and nothing is wrongly matched", () => {
-    const v = judgeNewRule(analysis([claim("C1", "MER-R3")], [rule(WINDOW)]), opts);
+    const v = judgeNewRule(analysis([claim("C1", "MER-R2")], [rule(WINDOW)]), opts);
     expect(v).toMatchObject({ pass: true, wrongMatches: [] });
     expect(v.found).not.toBeNull();
   });
 
   it("matching a rule the same dispute also teaches is fine", () => {
-    expect(judgeNewRule(analysis([claim("C1", "MER-R3")], [rule(WINDOW)]), opts).pass).toBe(true);
+    expect(judgeNewRule(analysis([claim("C1", "MER-R2")], [rule(WINDOW)]), opts).pass).toBe(true);
   });
 
   it("fails, and says so, when an unrelated existing rule is claimed to cover it", () => {

@@ -294,15 +294,10 @@ export class MessageNotReady extends Error {
   }
 }
 
-export interface AnalyzeOptions {
-  /** The person has seen the "looks cut off" warning and wants to go ahead. Never overrides a blocked message. */
-  proceedAnyway?: boolean;
-}
-
-export async function analyzeDispute(input: ContextInput, provider: LlmProvider, opts: AnalyzeOptions = {}): Promise<AnalysisResult> {
-  // Before any model call: a message that is empty, huge, or looks cut off costs nothing to refuse.
+export async function analyzeDispute(input: ContextInput, provider: LlmProvider): Promise<AnalysisResult> {
+  // Before any model call: a message that is empty, a fragment or huge costs nothing to refuse.
   const verdict = checkMessage(input.message);
-  if (verdict.status === "blocked" || (verdict.status === "maybe_cut_off" && !opts.proceedAnyway)) throw new MessageNotReady(verdict);
+  if (verdict.status === "blocked") throw new MessageNotReady(verdict);
   const ctx = assembleContext(input);
   const { analysis, meta } = await runAnalysis(ctx, provider);
   return processAnalysis(input, ctx, analysis, meta);
