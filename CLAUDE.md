@@ -47,7 +47,10 @@ asks for something the invoice data cannot support, the agent puts it in `unclea
 **Manual override.** The merchant can know things the ledger does not. A business or
 manual-review finding can be overridden for one invoice, with an optional reason: the invoice
 goes out with its format fixes and the finding is waived on the record
-(`src/lib/engine/overrides.ts`, `state/overrides.json`). Format fixes cannot be overridden. An
+(`src/lib/engine/overrides.ts`, `state/overrides.json`). A format *finding* cannot be waived as fine, but each auto-applied format fix has a switch: on by
+default, and the merchant can turn one off for a single invoice (`format_off` in the invoice record;
+on the dispute screen it is saved with the dispute). Switching a fix off leaves the rule untouched and
+still lets the invoice go. An
 override never edits or disables the rule; the same rule overridden on 2 different invoices is
 marked "may be out of date" for the merchant to review. Declining a business proposal in a
 dispute works the same way (format fixes stay, nothing is learned from the declined claim).

@@ -65,6 +65,23 @@ export async function waiveFinding(invoiceId: string, ruleId: string, reason: st
   return { ok: true };
 }
 
+/**
+ * Switch one format fix on or off for this invoice. Fixes are applied by default. Turning one off does not waive
+ * the finding or touch the rule: the invoice just goes without that fix, and the ledger still checks it next time.
+ */
+export async function setFormatFix(invoiceId: string, ruleId: string, on: boolean): Promise<{ ok: boolean; error?: string }> {
+  const w = workingDraft(invoiceId);
+  if (w.readOnly) return { ok: false, error: "This invoice can no longer be changed." };
+  const rule = w.rules.find((r) => r.rule_id === ruleId);
+  if (!rule || rule.type !== "format" || rule.status !== "active") return { ok: false, error: "That is not a format fix on this invoice." };
+  const off = new Set(w.record.format_off ?? []);
+  if (on) off.delete(ruleId);
+  else off.add(ruleId);
+  saveRecord(invoiceId, { ...w.record, format_off: [...off] });
+  refresh();
+  return { ok: true };
+}
+
 /** Put a resolved row back as an open finding. */
 export async function undoDecision(invoiceId: string, ruleId: string): Promise<{ ok: boolean }> {
   const record = loadRecord(invoiceId);
@@ -118,6 +135,8 @@ export async function previewDecision(invoiceId: string, include: string[], edit
 
 export interface CommitInput {
   approved: string[];
+  /** Applied format claims whose fix the merchant switched off on the revised invoice. */
+  format_off?: string[];
   declined: { claim_id: string; reason: string }[];
   edits: Record<string, number>;
   /** Indexes into the proposed rules the merchant wants taught. */
@@ -134,6 +153,8 @@ export async function commitAnalysis(invoiceId: string, input: CommitInput): Pro
   const stagedIds = new Set(result.staged.map((s) => s.claim_id));
   const approved = input.approved.filter((id) => stagedIds.has(id));
   const declined = [...stagedIds].filter((id) => !approved.includes(id));
+  const switchable = new Set(result.outcomes.filter((o) => o.claim.bucket === "format" && o.status === "applied").map((o) => o.claim.claim_id));
+  const formatOff = (input.format_off ?? []).filter((id) => switchable.has(id));
   const reasons = Object.fromEntries(input.declined.filter((d) => d.reason.trim()).map((d) => [d.claim_id, d.reason.trim().slice(0, 300)]));
 
   // A rule taught only by a claim the merchant declined is not learned. A rule the ledger already had
@@ -172,6 +193,7 @@ export async function commitAnalysis(invoiceId: string, input: CommitInput): Pro
       total_reduction: delta.total_reduction_inr,
       wage_reduction: delta.wage_reduction_inr,
       ledger_size: resolution.ledger.length,
+      format_off: formatOff,
     },
   });
   refresh();

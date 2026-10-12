@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { approveFinding, undoDecision, waiveFinding } from "../actions";
+import { approveFinding, setFormatFix, undoDecision, waiveFinding } from "../actions";
 import { plural, rupees } from "../../lib/app/format";
 import type { HandledView, NeedView, PresendView } from "../../lib/app/presend_view";
 import { activate, Id, type Touch } from "./bits";
-import { InvoicePanel } from "./InvoicePanel";
+import { InvoicePanel, type Focus } from "./InvoicePanel";
+import type { FormatFocus } from "../../lib/app/panel";
 
 type Key = string;
 const needKey = (n: NeedView): Key => `need:${n.rule_id}`;
@@ -14,12 +15,19 @@ const needKey = (n: NeedView): Key => `need:${n.rule_id}`;
 export function PresendBoard({ view }: { view: PresendView }) {
   const firstNeed = view.needs[0];
   const [selected, setSelected] = useState<Key | null>(firstNeed ? needKey(firstNeed) : null);
-  const [open, setOpen] = useState<Key | null>(null);
+  // The format fixes the agent made on its own are the point of the screen, so they start open.
+  const [open, setOpen] = useState<Key | null>(!view.read_only && view.handled.some((h) => h.kind === "formats") ? "formats" : null);
+  const [fixFocus, setFixFocus] = useState<FormatFocus | null>(null);
+  // A fix switch shows its new state at once; the server's answer follows. Dropped again only if the server refuses.
+  const [fixOn, setFixOn] = useState<Record<string, boolean>>({});
   const [waiving, setWaiving] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  // The parts of the invoice whose fix is switched off, as the screen shows it now (before the server catches up).
+  const offFocus = view.handled.flatMap((h) => (h.kind === "formats" ? h.fixes : [])).flatMap((f) => ((fixOn[f.rule_id] ?? f.on) || !f.focus ? [] : [f.focus]));
 
   const toggleOpen = (key: Key) => setOpen((o) => (o === key ? null : key));
 
@@ -28,7 +36,9 @@ export function PresendBoard({ view }: { view: PresendView }) {
   const need = view.needs.find((n) => needKey(n) === selected);
   const done = view.handled.find((h) => h.key === selected);
   if (need) touch = { ids: new Set(need.line_ids), all: need.line_ids.length === 0 && need.bucket === "format", tone: "ochre" };
-  else if (done) touch = { ids: new Set("line_ids" in done ? done.line_ids : []), all: done.kind === "formats", tone: "teal" };
+  else if (done) touch = { ids: new Set("line_ids" in done ? done.line_ids : []), all: false, tone: "teal" };
+  // A format fix lights what it changed on the invoice: one fix when it is picked, all of them for the row.
+  const focus: Focus = done?.kind === "formats" ? (fixFocus ?? "all") : null;
 
   const run = (id: string, work: () => Promise<{ ok: boolean; error?: string }>, after: () => void) => {
     setBusy(id);
@@ -161,7 +171,19 @@ export function PresendBoard({ view }: { view: PresendView }) {
           <HandledRow
             key={h.key} h={h} on={selected === h.key} open={open === h.key}
             busy={busy === (("rule_id" in h && h.rule_id) || h.key)}
-            onSelect={() => setSelected(h.key)}
+            onSelect={() => { setSelected(h.key); setFixFocus(null); }}
+            onFix={(f) => { setSelected(h.key); setFixFocus(f); }}
+            fixFocus={selected === h.key ? fixFocus : null}
+            readOnly={view.read_only}
+            fixOn={fixOn}
+            onToggleFix={(ruleId, on) => {
+              setFixOn((m) => ({ ...m, [ruleId]: on }));
+              run(`fix:${ruleId}`, async () => {
+                const r = await setFormatFix(view.invoice_id, ruleId, on);
+                if (!r.ok) setFixOn((m) => { const n = { ...m }; delete n[ruleId]; return n; });
+                return r;
+              }, () => {});
+            }}
             onToggle={() => toggleOpen(h.key)}
             onUndo={() => {
               if (!("rule_id" in h)) return;
@@ -201,26 +223,35 @@ export function PresendBoard({ view }: { view: PresendView }) {
       </div>
 
       <InvoicePanel
-        lines={view.lines} grouped={view.grouped} base={view.base} now={view.now} touch={touch}
-        footer={heldNote}
+        lines={view.lines} grouped={view.grouped} grouped0={view.grouped0} head={view.head} focus={focus} off={offFocus}
+        base={view.base} now={view.now} touch={touch} footer={heldNote}
       />
     </div>
   );
 }
 
 function HandledRow({
-  h, on, open, busy, onSelect, onToggle, onUndo,
+  h, on, open, busy, fixFocus, readOnly, fixOn, onSelect, onFix, onToggleFix, onToggle, onUndo,
 }: {
-  h: HandledView; on: boolean; open: boolean; busy: boolean;
-  onSelect: () => void; onToggle: () => void; onUndo: () => void;
+  h: HandledView; on: boolean; open: boolean; busy: boolean; fixFocus: FormatFocus | null;
+  readOnly: boolean; fixOn: Record<string, boolean>;
+  onSelect: () => void; onFix: (focus: FormatFocus | null) => void; onToggleFix: (ruleId: string, on: boolean) => void;
+  onToggle: () => void; onUndo: () => void;
 }) {
   const stale = h.kind === "waived" ? h.stale : null;
+  // The heading counts the fixes that are on right now, including a switch the server has not yet answered.
+  const heading =
+    h.kind === "formats" && !readOnly && h.fixes.some((f) => !(fixOn[f.rule_id] ?? f.on))
+      ? `${h.fixes.filter((f) => fixOn[f.rule_id] ?? f.on).length} of ${plural(h.fixes.length, "format fix", "format fixes")} applied`
+      : h.kind === "formats" && !readOnly
+        ? `${plural(h.fixes.length, "format fix", "format fixes")} applied`
+        : h.heading;
   return (
     <div className={`done${on ? " on" : ""}${h.kind === "waived" ? " set-aside" : ""}`}>
       <div className="row" onClick={onSelect}>
         <span className="tick" aria-hidden="true">{h.kind === "waived" ? "–" : "✓"}</span>
         <div className="what" role="button" tabIndex={0} aria-pressed={on} onKeyDown={activate(onSelect)}>
-          {h.heading}
+          {heading}
           <i>
             {h.note}
             {stale?.may_be_out_of_date && (
@@ -238,12 +269,29 @@ function HandledRow({
       </div>
       {h.kind === "formats" && (
         <div className="more" hidden={!open}>
-          <ul>
-            {h.fixes.map((f) => (
-              <li key={f.rule_id}>
-                {f.text} · <Id>{f.rule_id}</Id>
+          <ul className="fixes">
+            {h.fixes.map((fix) => {
+              const f = { ...fix, on: fixOn[fix.rule_id] ?? fix.on };
+              return (
+              <li key={f.rule_id} className={f.on ? undefined : "off"}>
+                <input
+                  type="checkbox" checked={f.on} disabled={readOnly}
+                  aria-label={`Apply: ${f.text}`}
+                  onChange={(e) => onToggleFix(f.rule_id, e.target.checked)}
+                />
+                <span>
+                  <button
+                    type="button" className="fixlink" aria-pressed={fixFocus !== null && fixFocus === f.focus}
+                    onClick={(e) => { e.stopPropagation(); onFix(f.focus); }}
+                  >
+                    {f.text}
+                  </button>{" "}
+                  · <Id>{f.rule_id}</Id>
+                  {!f.on && <em> · Not applied to this invoice</em>}
+                </span>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       )}

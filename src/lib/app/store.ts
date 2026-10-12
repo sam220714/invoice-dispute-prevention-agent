@@ -31,6 +31,8 @@ export interface Approval {
 
 export interface InvoiceRecord {
   approved: Approval[];
+  /** Format rules whose fix the merchant switched off for this invoice. Applied by default; the rule itself is untouched. */
+  format_off?: string[];
   sent_at?: string;
   sent_total?: number;
 }
@@ -71,6 +73,8 @@ export interface ResolvedRecord {
   total_reduction: number;
   wage_reduction: number;
   ledger_size: number;
+  /** Format claims whose fix the merchant switched off on the revised invoice. */
+  format_off?: string[];
 }
 
 export interface StoredAnalysis {

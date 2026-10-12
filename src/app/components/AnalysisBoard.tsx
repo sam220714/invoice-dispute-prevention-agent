@@ -8,7 +8,8 @@ import type { AnalysisView, ClaimView, Preview, RuleView } from "../../lib/app/a
 import type { Chip } from "../../lib/app/chips";
 import { activate, Id, Sources, type Touch } from "./bits";
 import { InvoiceBar } from "./InvoiceBar";
-import { InvoicePanel } from "./InvoicePanel";
+import { InvoicePanel, type Focus } from "./InvoicePanel";
+import type { FormatFocus } from "../../lib/app/panel";
 
 type Decision = "approved" | "declined";
 
@@ -19,7 +20,6 @@ const CHECK_WORDS: Record<string, string> = {
   rejected: "Refused",
 };
 
-const SEEN: Record<NonNullable<ClaimView["seen"]>, string> = { foreseeable: "Foreseeable", new: "New Rule Learned" };
 
 interface Bar { invoiceId: string; buyer: string; period: string; chip: Chip }
 
@@ -27,6 +27,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   const resolved = view.resolved;
   const proposed = view.claims.filter((c) => c.status === "proposed");
   const formatApplied = view.claims.filter((c) => c.bucket === "format" && c.status === "applied");
+  const switchable = (c: ClaimView) => c.bucket === "format" && c.status === "applied" && c.focus !== null;
 
   const [decisions, setDecisions] = useState<Record<string, Decision>>(() => {
     if (!resolved) return {};
@@ -38,6 +39,8 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   const [reasons, setReasons] = useState<Record<string, string>>(() =>
     Object.fromEntries((resolved?.declined ?? []).flatMap((d) => (d.reason ? [[d.claim_id, d.reason]] : []))));
   const [edits, setEdits] = useState<Record<string, number>>({});
+  // Format fixes are applied by default; the merchant can switch one off on the revised invoice.
+  const [fmtOff, setFmtOff] = useState<Set<string>>(() => new Set(resolved?.format_off ?? []));
   const [learn, setLearn] = useState<Set<number>>(() => new Set(view.rules.filter((r) => !r.duplicate_of).map((r) => r.ix)));
   const [selected, setSelected] = useState<string | null>(view.claims[0]?.claim_id ?? null);
   const [open, setOpen] = useState<string | null>(null);
@@ -88,6 +91,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
         approved,
         declined: proposed.filter((c) => decisions[c.claim_id] === "declined").map((c) => ({ claim_id: c.claim_id, reason: reasons[c.claim_id] ?? "" })),
         edits: keptEdits,
+        format_off: view.claims.filter((c) => switchable(c) && fmtOff.has(c.claim_id)).map((c) => c.claim_id),
         learn: [...learn],
       });
       if (!r.ok) setError(r.error ?? "That could not be saved.");
@@ -98,7 +102,8 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   let barLabel = "Save decisions";
   let acceptPending = false;
   if (proposed.length && pending.length === proposed.length) {
-    barLabel = formatApplied.length ? `Accept ${proposed.length}, apply ${formatApplied.length}` : `Accept ${proposed.length}`;
+    const formatOn = formatApplied.filter((c) => !fmtOff.has(c.claim_id)).length;
+    barLabel = formatOn ? `Accept ${proposed.length}, apply ${formatOn}` : `Accept ${proposed.length}`;
     acceptPending = true;
   } else if (pending.length) {
     barLabel = `Accept the remaining ${pending.length}`;
@@ -108,35 +113,38 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   // ---- what the selection touches on the invoice
   const sel = view.claims.find((c) => c.claim_id === selected);
   const selRule = selected?.startsWith("rule:") ? view.rules.find((r) => `rule:${r.ix}` === selected) : undefined;
+  // A format claim lights the part of the invoice it changed (the focus below), not every line it applies to.
   const touch: Touch = sel
-    ? { ids: new Set(sel.line_ids), all: sel.all_lines, tone: sel.bucket === "business" ? "ochre" : "teal" }
+    ? { ids: new Set(sel.line_ids), all: sel.all_lines && !(sel.bucket === "format" && sel.focus), tone: sel.bucket === "business" ? "ochre" : "teal" }
     : selRule ? { ids: new Set(), all: false, tone: "teal" } : null;
   const fmtSelected = sel ? sel.bucket === "format" : Boolean(selRule);
+  const offFocus = view.claims.flatMap((c) => (switchable(c) && fmtOff.has(c.claim_id) && c.focus ? [c.focus] : []));
+  // A format claim or rule lights the part of the invoice it governs.
+  const focus: Focus = sel?.bucket === "format" ? sel.focus : selRule ? selRule.focus : null;
 
   // ---- groups
   const isOpenCard = (c: ClaimView) =>
     c.status === "proposed" ? !decisions[c.claim_id] : c.status !== "applied";
   const needs = view.claims.filter(isOpenCard);
-  // "Already handled" is what the ledger already knew, business or format. A settled claim that taught a
-  // new rule is listed with the new rules instead.
+  // Two different questions, kept apart: what happens to THIS invoice (every settled claim, business or format),
+  // and what the LEDGER remembers for next time (the new rules the dispute taught).
   const settled = view.claims.filter((c) => !isOpenCard(c));
-  const handled = settled.filter((c) => c.seen !== "new");
-  const learnedNow = settled.filter((c) => c.seen === "new");
   const newRules = view.rules.filter((r) => !r.duplicate_of);
+  const basedOn = (r: RuleView) => view.claims.find((c) => r.claim_ids.includes(c.claim_id))?.title ?? null;
 
   // ---- verdict
   const { matched, total } = view.foreseen;
   const say = resolved
     ? resolved.written.length
       ? `${Word(resolved.written.length)} new ${resolved.written.length === 1 ? "rule" : "rules"} will now be checked on every ${view.buyer_short} invoice.`
-      : "Saved. The ledger already knew all of this."
+      : "Saved. Your existing rules already cover all of this."
     : total === 0
     ? "Nothing in this message asks for a change."
     : matched === 0
-      ? "None of these objections were in your ledger yet."
+      ? "These are new, so there are rules to learn from them."
       : matched === total
-        ? total === 1 ? "The objection was already in your ledger." : `All ${word(total)} objections were already in your ledger.`
-        : `${Word(matched)} of ${word(total)} objections were already in your ledger.`;
+        ? total === 1 ? "Your existing rules cover this objection." : `Your existing rules cover all ${word(total)} objections.`
+        : `${Word(matched)} of ${word(total)} are covered by rules you already have.`;
   let sub: string;
   if (resolved) sub = `Filed as ${resolved.dispute_id}. ${resolved.corroborated.length ? `${plural(resolved.corroborated.length, "rule")} already in the ledger ${resolved.corroborated.length === 1 ? "was" : "were"} confirmed again.` : ""}`;
   else if (total === 0) sub = "The agent found nothing in it to act on. If this was the wrong message, paste a different one.";
@@ -144,7 +152,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   else if (proposed.length) sub = "All decided. Save to write what this taught to the ledger.";
   else sub = "Nothing here changes the billed amount.";
 
-  const verdictFlag = resolved ? "SAVED" : total === 0 ? "NO CLAIMS" : matched ? "FORESEEABLE" : "NEW";
+  const verdictFlag = resolved ? "SAVED" : total === 0 ? "NO CLAIMS" : "TO REVIEW";
   const verdictTone = resolved ? "saved" : "attn";
   const rupeeNote = declinedN
     ? `revised total · you declined ${declinedN}`
@@ -153,7 +161,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
   // ---- invoice panel lines with the preview applied
   const panelLines = view.lines.map((l) => {
     const p = preview.lines[l.line_id];
-    return { line_id: l.line_id, description: l.description, site_name: l.site_name, site_full: l.site_full, unit: l.unit, qty0: l.qty, qty1: p?.qty ?? l.qty, amount0: l.amount, amount1: p?.amount ?? l.amount };
+    return { line_id: l.line_id, description: l.description, site_name: l.site_name, site_full: l.site_full, unit: l.unit, qty0: l.qty, qty1: p?.qty ?? l.qty, amount0: l.amount, amount1: p?.amount ?? l.amount, po0: l.po0, po1: l.po1, sac0: l.sac0, sac1: l.sac1, pos0: l.pos0 };
   });
 
   const card = (c: ClaimView) => (
@@ -164,6 +172,8 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
       editing={editing === c.claim_id} declining={declining === c.claim_id}
       draftReason={draftReason} edits={edits} busy={saving}
       decision={decisions[c.claim_id]} decisionReason={reasons[c.claim_id]} locked={Boolean(resolved)}
+      fmtOff={fmtOff.has(c.claim_id)} canSwitch={switchable(c)}
+      onToggleFmt={() => setFmtOff((s) => { const n = new Set(s); if (n.has(c.claim_id)) n.delete(c.claim_id); else n.add(c.claim_id); return n; })}
       onSelect={() => setSelected(c.claim_id)}
       onToggle={() => toggleOpen(c.claim_id)}
       onApprove={() => { decide(c.claim_id, "approved"); setEditing(null); setDeclining(null); }}
@@ -230,16 +240,15 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
             {needs.length > 0 && <p className="lbl">Needs you</p>}
             {needs.map(card)}
 
-            {handled.length > 0 && <p className="lbl f">Already handled</p>}
-            {handled.map(card)}
+            {settled.length > 0 && <p className="lbl f">Applied to this invoice</p>}
+            {settled.map(card)}
 
-            {(learnedNow.length > 0 || (!resolved && newRules.length > 0)) && (
-              <p className="lbl f">{resolved ? "New rules learned" : `New rules for ${view.buyer_short}'s ledger`}</p>
+            {(resolved ? resolved.written.length + resolved.corroborated.length > 0 : newRules.length > 0) && (
+              <p className="lbl led">{resolved ? `Added to ${view.buyer_short}'s ledger` : `Remember for ${view.buyer_short}'s ledger`}</p>
             )}
-            {learnedNow.map(card)}
             {!resolved && newRules.map((r) => (
               <RuleRow
-                key={r.ix} r={r} on={selected === `rule:${r.ix}`} checked={learn.has(r.ix) && !ruleBlocked(r)} blocked={ruleBlocked(r)}
+                key={r.ix} r={r} basedOn={basedOn(r)} buyer={view.buyer_short} on={selected === `rule:${r.ix}`} checked={learn.has(r.ix) && !ruleBlocked(r)} blocked={ruleBlocked(r)}
                 onSelect={() => setSelected(`rule:${r.ix}`)}
                 onToggle={() => setLearn((s) => { const n = new Set(s); if (n.has(r.ix)) n.delete(r.ix); else n.add(r.ix); return n; })}
               />
@@ -248,18 +257,18 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
             {resolved && (
               <>
                 {resolved.written.map((w) => (
-                  <div className="done" key={w.rule_id}>
+                  <div className="done ledger" key={w.rule_id}>
                     <div className="row" style={{ cursor: "default" }}>
                       <span className="tick" aria-hidden="true">✓</span>
                       <div className="what">
-                        Written to the ledger: {w.text}
+                        {w.text}
                         <i><Id>{w.rule_id}</Id> · from <Sources sources={w.sources.map((id) => ({ id, date: null }))} /> · checked on every {view.buyer_short} invoice from now on</i>
                       </div>
                     </div>
                   </div>
                 ))}
                 {resolved.corroborated.length > 0 && (
-                  <div className="done">
+                  <div className="done ledger">
                     <div className="row" style={{ cursor: "default" }}>
                       <span className="tick" aria-hidden="true">✓</span>
                       <div className="what">
@@ -317,7 +326,7 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
               </>
             ) : (
               <div style={{ marginTop: 0 }}>
-                <InvoicePanelEmbedded view={view} lines={panelLines} preview={preview} touch={touch} />
+                <InvoicePanelEmbedded view={view} lines={panelLines} preview={preview} touch={touch} focus={focus} off={offFocus} />
               </div>
             )}
 
@@ -340,12 +349,14 @@ export function AnalysisBoard({ view, bar }: { view: AnalysisView; bar: Bar }) {
 }
 
 // The invoice tab reuses the same panel, without its own card chrome nested in the source card.
-function InvoicePanelEmbedded({ view, lines, preview, touch }: {
-  view: AnalysisView; lines: React.ComponentProps<typeof InvoicePanel>["lines"]; preview: Preview; touch: Touch;
+function InvoicePanelEmbedded({ view, lines, preview, touch, focus, off }: {
+  view: AnalysisView; lines: React.ComponentProps<typeof InvoicePanel>["lines"]; preview: Preview; touch: Touch; focus: Focus;
+  off: FormatFocus[];
 }) {
   return (
     <InvoicePanel
-      lines={lines} grouped={view.grouped_by_site} base={view.base_totals} now={preview.totals} touch={touch}
+      lines={lines} grouped={view.grouped_by_site} grouped0={view.grouped0} head={view.head} focus={focus} off={off}
+      labels={["As sent", "Fixed"]} base={view.base_totals} now={preview.totals} touch={touch}
     />
   );
 }
@@ -355,6 +366,7 @@ interface CardProps {
   c: ClaimView; on: boolean; open: boolean; amount: number | null; edited: boolean;
   editing: boolean; declining: boolean; draftReason: string; edits: Record<string, number>; busy: boolean;
   decision: Decision | undefined; decisionReason: string | undefined; locked: boolean;
+  fmtOff: boolean; canSwitch: boolean; onToggleFmt: () => void;
   onSelect: () => void; onToggle: () => void;
   onApprove: () => void; onEdit: () => void; onEditQty: (key: string, v: number, max: number) => void; onResetEdits: () => void;
   onDeclineStart: () => void; onReason: (v: string) => void; onDecline: () => void; onCancel: () => void; onUndo: () => void;
@@ -379,21 +391,31 @@ function ClaimCard(p: CardProps) {
   // A decided or applied claim is a flat row: the system, or the merchant, has settled it.
   if (decision || c.status === "applied") {
     const declined = decision === "declined";
+    const off = p.canSwitch && p.fmtOff;
     return (
-      <div className={`done${on ? " on" : ""}${declined ? " set-aside" : ""}`}>
+      <div className={`done${on ? " on" : ""}${declined || off ? " set-aside" : ""}`}>
         <div className="row" onClick={p.onSelect}>
-          <span className="tick" aria-hidden="true">{declined ? "–" : "✓"}</span>
+          {p.canSwitch ? (
+            <label className="check" onClick={(e) => e.stopPropagation()} style={{ flex: "none" }}>
+              <input
+                type="checkbox" checked={!p.fmtOff} disabled={p.locked || p.busy} onChange={p.onToggleFmt} onFocus={p.onSelect}
+                aria-label={`Apply this fix: ${c.title}`}
+              />
+            </label>
+          ) : (
+            <span className="tick" aria-hidden="true">{declined ? "–" : "✓"}</span>
+          )}
           <div className="what" role="button" tabIndex={0} aria-pressed={on} onKeyDown={activate(p.onSelect)}>
             {c.title}
             <i>
               <span className={`tag ${biz ? "biz" : "fmt"}`} style={{ marginRight: 8 }}>{biz ? "Business" : "Format"}</span>
               {declined
                 ? `Declined${p.decisionReason ? `: ${p.decisionReason}` : ""}`
-                : <>{c.where}{p.edited && " · edited"}{c.seen && <> · <span className={`seen${c.seen === "new" ? " new" : ""}`}>{SEEN[c.seen]}</span></>}</>}
+                : <>{c.where}{p.edited && " · edited"}</>}
             </i>
           </div>
           {decision === "approved" && p.amount !== null && <span className="cut num">−{rupees(p.amount)}</span>}
-          {c.status === "applied" && <span className="cut num" style={{ fontWeight: 500 }}>applied</span>}
+          {c.status === "applied" && <span className="cut num" style={{ fontWeight: 500 }}>{off ? "not applied" : "applied"}</span>}
           {decision && !p.locked && (
             <button className="link" onClick={(e) => { e.stopPropagation(); p.onUndo(); }}>Undo</button>
           )}
@@ -412,7 +434,6 @@ function ClaimCard(p: CardProps) {
           <div className="what">{c.title}</div>
           <div className="where">
             {c.where}
-            {c.seen && <span className={`seen${c.seen === "new" ? " new" : ""}`}>{SEEN[c.seen]}</span>}
           </div>
         </div>
         {c.status === "proposed" && p.amount !== null
@@ -467,19 +488,30 @@ function ClaimCard(p: CardProps) {
   );
 }
 
-function RuleRow({ r, on, checked, blocked, onSelect, onToggle }: {
-  r: RuleView; on: boolean; checked: boolean; blocked: boolean; onSelect: () => void; onToggle: () => void;
+function RuleRow({ r, basedOn, buyer, on, checked, blocked, onSelect, onToggle }: {
+  r: RuleView; basedOn: string | null; buyer: string; on: boolean; checked: boolean; blocked: boolean; onSelect: () => void; onToggle: () => void;
 }) {
   return (
-    <div className={`done${on ? " on" : ""}`}>
+    <div className={`done ledger${on ? " on" : ""}`}>
       <div className="row" onClick={onSelect}>
         <label className="check" onClick={(e) => e.stopPropagation()}>
           <input type="checkbox" checked={checked} disabled={blocked} onChange={onToggle} onFocus={onSelect} aria-label="Remember this rule" />
           <span className="what" style={{ fontWeight: 500, fontSize: 16 }}>
             {r.text}
             <i style={{ display: "block", fontStyle: "normal", color: "var(--text-3)", fontSize: 14, marginTop: 2 }}>
-              {blocked ? "Not learned: you declined the claim behind it" : <><span className={`tag ${r.type === "business" ? "biz" : "fmt"}`} style={{ marginRight: 8 }}>{r.type === "business" ? "Business" : "Format"}</span>checked on every invoice from now on</>}
+              {blocked ? "Not learned: you declined the claim behind it" : (
+                <>
+                  <span className="tag led" style={{ marginRight: 8 }}>New rule</span>
+                  <span className={`tag ${r.type === "business" ? "biz" : "fmt"}`} style={{ marginRight: 8 }}>{r.type === "business" ? "Business" : "Format"}</span>
+                  Checked on every {buyer} invoice from now on
+                </>
+              )}
             </i>
+            {!blocked && (
+              <i style={{ display: "block", fontStyle: "normal", color: "var(--text-3)", fontSize: 13, marginTop: 3 }}>
+                {basedOn ? <>Based on: {basedOn}</> : "Mentioned in passing in the email"}
+              </i>
+            )}
           </span>
         </label>
       </div>

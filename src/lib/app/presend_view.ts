@@ -5,6 +5,7 @@ import { buildPreSendReport, type PreSendReport, type ReportItem } from "../engi
 import { applyToolCall, createDraft, previewImpact, type Draft, type ToolCall } from "../engine/tools";
 import type { Invoice, Rule } from "../schema";
 import { compactLines, plural, shortDate, word } from "./format";
+import { focusOfCheck, formatFields, isGroupedBySite, panelHead, windowOf, type FormatFields, type FormatFocus, type PanelHead } from "./panel";
 import { describeFinding, proposeFor } from "./propose";
 import { loadRecord, type InvoiceRecord } from "./store";
 
@@ -25,7 +26,7 @@ export interface Source {
   date: string | null;
 }
 
-export interface LineView {
+export interface LineView extends FormatFields {
   line_id: string;
   description: string;
   site_code: string;
@@ -70,6 +71,10 @@ export interface FixView {
   rule_id: string;
   text: string;
   sources: Source[];
+  /** The part of the invoice this fix changed, to light it on the panel. */
+  focus: FormatFocus | null;
+  /** Applied to this invoice. On by default; the merchant can switch it off for one invoice. */
+  on: boolean;
 }
 
 export type HandledView =
@@ -104,6 +109,9 @@ export interface PresendView {
   passed: { rule_id: string; text: string }[];
   lines: LineView[];
   grouped: boolean;
+  /** Whether the invoice as drafted (before any format fix) already had its lines grouped by site. */
+  grouped0: boolean;
+  head: PanelHead;
   base: TotalsView;
   now: TotalsView;
   /** The resolved decisions, in money: wages held and what that took off the invoice. */
@@ -130,18 +138,6 @@ export function displayCall(call: ToolCall): DisplayCall {
     case "regroup_lines": return { tool: call.tool, args: [call.group_by] };
     default: return { tool: call.tool, args: [] };
   }
-}
-
-/** Sites appear as unbroken runs: nothing is split across the invoice. */
-function isGroupedBySite(inv: Invoice): boolean {
-  const seen = new Set<string>();
-  let previous: string | null = null;
-  for (const l of inv.lines) {
-    if (l.site_code !== previous && seen.has(l.site_code)) return false;
-    seen.add(l.site_code);
-    previous = l.site_code;
-  }
-  return true;
 }
 
 export function replayApprovals(draft: Draft, record: InvoiceRecord): Draft {
@@ -188,14 +184,18 @@ export function workingDraft(invoiceId: string) {
   // Only an unsent draft can still be decided. A sent or disputed invoice is read as it went out.
   const readOnly = sent || invoice.status !== "draft";
 
-  let baseDraft = createDraft({ invoice, buyer, annexure, rules });
+  // A format fix the merchant switched off for this invoice is simply not run: the draft, the checks and the
+  // send gate all see the invoice without it. The rule stays in the ledger, untouched.
+  const off = new Set(record.format_off ?? []);
+  const appliedRules = rules.filter((r) => !(r.type === "format" && off.has(r.rule_id)));
+  let baseDraft = createDraft({ invoice, buyer, annexure, rules: appliedRules });
   if (!readOnly || sent) baseDraft = applyToolCall(baseDraft, { tool: "apply_template" }, { actor: "engine" }).draft;
   const current = replayApprovals(baseDraft, record);
-  return { invoice, buyer, annexure, rules, record, sent, readOnly, baseDraft, current };
+  return { invoice, buyer, annexure, rules, appliedRules, off, record, sent, readOnly, baseDraft, current };
 }
 
 export function buildPresendView(invoiceId: string): PresendView {
-  const { invoice, buyer, annexure, rules, record, sent, readOnly, baseDraft, current } = workingDraft(invoiceId);
+  const { invoice, buyer, annexure, rules, appliedRules, off, record, sent, readOnly, baseDraft, current } = workingDraft(invoiceId);
   const overrides = loadOverrides();
   const ruleOf = (id: string) => rules.find((r) => r.rule_id === id);
 
@@ -205,7 +205,7 @@ export function buildPresendView(invoiceId: string): PresendView {
   // What the draft would look like with nothing decided: the format fixes the agent makes on its own.
   const asDrafted = buildPreSendReport({ invoice, buyer, annexure }, rules);
 
-  const raw: PreSendReport = buildPreSendReport({ invoice: current.invoice, buyer, annexure: current.annexure }, rules);
+  const raw: PreSendReport = buildPreSendReport({ invoice: current.invoice, buyer, annexure: current.annexure }, appliedRules);
   const reviewed = applyOverrides(raw, overrides);
 
   // ---- needs you
@@ -254,12 +254,16 @@ export function buildPresendView(invoiceId: string): PresendView {
       key: "formats",
       heading: readOnly && !sent
         ? `${plural(formatDone.length, "format fix", "format fixes")} would have been applied`
-        : `${plural(formatDone.length, "format fix", "format fixes")} applied`,
+        : formatDone.some((i) => off.has(i.finding.rule_id))
+          ? `${formatDone.filter((i) => !off.has(i.finding.rule_id)).length} of ${plural(formatDone.length, "format fix", "format fixes")} applied`
+          : `${plural(formatDone.length, "format fix", "format fixes")} applied`,
       note: "No amount changed",
       fixes: formatDone.map((i) => ({
         rule_id: i.finding.rule_id,
         text: describeFix(i, ruleOf(i.finding.rule_id), invoice),
         sources: sourcesOf(i.rule.learned_from),
+        focus: focusOfCheck(ruleOf(i.finding.rule_id)?.check),
+        on: !off.has(i.finding.rule_id),
       })),
     });
   }
@@ -287,6 +291,7 @@ export function buildPresendView(invoiceId: string): PresendView {
       line_id: l.line_id, description: l.description.replace(/ - .*$/, ""), site_code: l.site_code,
       site_name: label.short(l.site_code), site_full: label.full(l.site_code), unit: l.unit,
       qty0: b.qty, qty1: l.qty, amount0: b.amount, amount1: l.amount,
+      ...formatFields(invoice, l),
     };
   });
 
@@ -309,8 +314,8 @@ export function buildPresendView(invoiceId: string): PresendView {
     const n = asDrafted.business.length + asDrafted.format.length;
     verdict = n
       ? {
-          tone: "as_sent", flag: "AS SENT", say: `${plural(n, "problem")} the ledger already knew about.`,
-          sub: `${short} has rejected ${n === 1 ? "this" : "these"} before. Nothing checked before it went out.`,
+          tone: "as_sent", flag: "AS SENT", say: "Here's what the rules would have caught.",
+          sub: `${plural(n, "issue")} ${short} has flagged before.`,
           money: null, moneyNote: "",
         }
       : {
@@ -319,7 +324,7 @@ export function buildPresendView(invoiceId: string): PresendView {
         };
   } else if (open === 0) {
     verdict = {
-      tone: "ready", flag: "READY", say: "Nothing left to argue about.",
+      tone: "ready", flag: "READY", say: "Ready to send.",
       sub: reviewed.overridden.length
         ? `${plural(reviewed.overridden.length, "finding")} waived by you. ${short} has no other open objection.`
         : `${short} has no open objection to this invoice.`,
@@ -332,7 +337,7 @@ export function buildPresendView(invoiceId: string): PresendView {
       tone: "hold", flag: "HOLD",
       say: open === 1 ? "One decision before this can go out." : `${word(open).replace(/^./, (c) => c.toUpperCase())} decisions before this can go out.`,
       sub: everyKnown
-        ? `${short} has rejected ${open === 1 ? "this" : open === 2 ? "both of these" : `all ${word(open)} of these`} before.`
+        ? `The agent caught what ${short} has flagged before.`
         : businessOpen ? "Each one changes what is billed." : "A person has to fix this.",
       money: atRisk, moneyNote: atRisk === null ? "" : "at risk if sent as is",
     };
@@ -355,6 +360,8 @@ export function buildPresendView(invoiceId: string): PresendView {
     passed: reviewed.passed.map((p) => ({ rule_id: p.rule_id, text: p.rule_text })),
     lines,
     grouped: isGroupedBySite(current.invoice),
+    grouped0: isGroupedBySite(invoice),
+    head: panelHead(invoice, short, windowOf(buyer.id, rules)),
     base: totalsOf(baseDraft.invoice),
     now: totalsOf(current.invoice),
     held,

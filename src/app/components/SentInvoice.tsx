@@ -45,7 +45,10 @@ export function SentInvoice({ view, chip, total, raised, disputable }: Props) {
         </div>
       </div>
       <div style={{ maxWidth: 780 }}>
-        <InvoicePanel lines={view.lines} grouped={view.grouped} base={view.base} now={view.base} touch={null} caption="as sent" />
+        <InvoicePanel
+          lines={view.lines} grouped={view.grouped} grouped0={view.grouped0} head={view.head}
+          labels={["As drafted", "As sent"]} base={view.base} now={view.base} touch={null} caption="as sent"
+        />
       </div>
     </main>
   );

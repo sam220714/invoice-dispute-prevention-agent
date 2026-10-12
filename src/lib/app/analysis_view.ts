@@ -1,8 +1,9 @@
-import { getBuyer, getInvoice, loadAllDisputes, loadInvoices } from "../data/load";
+import { getBuyer, getInvoice, loadAllDisputes, loadInvoices, loadLedger } from "../data/load";
 import type { AnalysisResult, ClaimOutcome } from "../engine/analyze";
 import { applyToolCall, type Draft, type ToolCall } from "../engine/tools";
 import type { Invoice } from "../schema";
 import { compactLines, shortDate } from "./format";
+import { focusOfCall, focusOfCheck, formatFields, isGroupedBySite, panelHead, windowOf, type FormatFields, type FormatFocus, type PanelHead } from "./panel";
 import { displayCall, siteLabels, type DisplayCall, type Source, type TotalsView } from "./presend_view";
 import { segmentMessage, type Segment } from "./quotes";
 import { loadAnalysis, type ResolvedRecord } from "./store";
@@ -43,6 +44,8 @@ export interface ClaimView {
   notes: string[];
   needs_human: boolean;
   rule_ix: number | null;
+  /** The part of the invoice a format claim changes, to light it on the panel. */
+  focus: FormatFocus | null;
 }
 
 export interface RuleView {
@@ -54,9 +57,11 @@ export interface RuleView {
   claim_ids: string[];
   /** An active rule already enforces this: seeing it again only corroborates. */
   duplicate_of: string | null;
+  /** The part of the invoice this rule governs, to light it on the panel. */
+  focus: FormatFocus | null;
 }
 
-export interface LineRow {
+export interface LineRow extends FormatFields {
   line_id: string;
   description: string;
   site_name: string;
@@ -83,6 +88,8 @@ export interface ResolvedView {
   declined: { claim_id: string; reason: string | null }[];
   /** Keys of the quantities the merchant changed before approving. */
   edited: string[];
+  /** Format claims whose fix the merchant switched off on the revised invoice. */
+  format_off: string[];
   written: { rule_id: string; text: string; type: string; sources: string[] }[];
   corroborated: { rule_id: string; text: string; times_after: number; confidence_after: string; confidence_before: string }[];
   skipped_rules: number;
@@ -105,6 +112,9 @@ export interface AnalysisView {
   foreseen: { matched: number; total: number };
   lines: LineRow[];
   grouped_by_site: boolean;
+  /** Whether the invoice as sent had its lines grouped by site. */
+  grouped0: boolean;
+  head: PanelHead;
   base_totals: TotalsView;
   preview: Preview;
   context: { name: string; items: number; detail: string }[];
@@ -203,9 +213,15 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
 
   const rules: RuleView[] = result.proposed_rules.map((p, ix) => ({
     ix, type: p.proposal.type, text: p.proposal.rule, quote: p.proposal.quote, confidence: p.proposal.confidence,
-    claim_ids: p.proposal.claim_ids, duplicate_of: p.duplicate_of,
+    claim_ids: p.proposal.claim_ids, duplicate_of: p.duplicate_of, focus: focusOfCheck(p.proposal.check),
   }));
   const taughtBy = (claimId: string) => rules.find((r) => !r.duplicate_of && r.claim_ids.includes(claimId))?.ix ?? null;
+
+  // A format claim is stored as the tool that fixed it, and apply_template covers PO and SAC alike, so the
+  // part of the invoice it changed comes from the rule it matched, or the one it taught.
+  const ledger = loadLedger();
+  const formatFocusOf = (o: ClaimOutcome, taught: FormatFocus | null): FormatFocus | null =>
+    focusOfCheck(ledger.find((r) => r.rule_id === o.foresight?.rule_id)?.check) ?? taught ?? (o.calls.map(focusOfCall).find(Boolean) ?? null);
 
   const stagedIds = new Set(result.staged.map((s) => s.claim_id));
   const claims: ClaimView[] = result.outcomes.map((o) => {
@@ -236,6 +252,7 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
       notes: noteFor(o),
       needs_human: Boolean(c.needs_human),
       rule_ix: ruleIx,
+      focus: c.bucket === "format" ? formatFocusOf(o, ruleIx !== null ? rules[ruleIx]!.focus : null) : null,
     };
   });
 
@@ -268,6 +285,7 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
       approved: r.approved,
       declined: r.declined,
       edited: Object.keys(r.edited_qty),
+      format_off: r.format_off ?? [],
       written: r.written.map((w) => ({ rule_id: w.rule_id, text: w.rule, type: w.type, sources: w.learned_from })),
       corroborated: r.corroborated.map((c) => ({
         rule_id: c.rule_id, text: result.outcomes.find((o) => o.foresight?.rule_id === c.rule_id)?.foresight?.rule ?? "",
@@ -282,6 +300,11 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
   }
 
   const stagedAll = result.staged.map((s) => s.claim_id);
+  // The portal window shows once the ledger enforces it, or while the agent is proposing it.
+  const proposedWindow = result.proposed_rules.flatMap((p) =>
+    !p.duplicate_of && p.proposal.check.kind === "invoice_date_window"
+      ? [{ from_day: p.proposal.check.from_day, to_day: p.proposal.check.to_day }]
+      : [])[0] ?? null;
   return {
     invoice_id: invoiceId,
     buyer_short: buyer.short_name,
@@ -294,9 +317,11 @@ export function buildAnalysisView(invoiceId: string): AnalysisView | null {
     foreseen: { matched: result.foreseen.matched, total: result.foreseen.total },
     lines: base.lines.map((l) => ({
       line_id: l.line_id, description: l.description.replace(/ - .*$/, ""), site_name: label.short(l.site_code), site_full: label.full(l.site_code),
-      unit: l.unit, qty: l.qty, amount: l.amount,
+      unit: l.unit, qty: l.qty, amount: l.amount, ...formatFields(invoice, l),
     })),
     grouped_by_site: grouped,
+    grouped0: isGroupedBySite(invoice),
+    head: panelHead(invoice, buyer.short_name, windowOf(buyer.id, ledger) ?? proposedWindow),
     base_totals: totalsOf(base),
     preview: computePreview(result, resolved ? (stored.resolved?.approved ?? []) : stagedAll, stored.resolved?.edited_qty ?? {}),
     context: result.context.sections.map((s) => ({ name: s.name, items: s.items, detail: s.detail })),
