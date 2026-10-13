@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
@@ -212,6 +212,32 @@ export function writeStateJson(rel: string, value: unknown): void {
   const path = appPath(rel);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, JSON.stringify(value, null, 2) + "\n", "utf-8");
+}
+
+// Syncing state/ to a shared store (remote_state.ts) goes through these two, so the filesystem stays in this module.
+/** Every file under state/ as relative path -> text. runs/ is skipped: it is write-only debug output. */
+export function readStateTree(dir: string = stateDir(), base: string = dir, out: Record<string, string> = {}): Record<string, string> {
+  if (!existsSync(dir)) return out;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    const rel = relative(base, full).split(sep).join("/");
+    if (rel === "runs") continue;
+    if (entry.isDirectory()) readStateTree(full, base, out);
+    else out[rel] = readFileSync(full, "utf-8");
+  }
+  return out;
+}
+
+/** Make state/ match the given files. Rewritten in place, never wiped first, so a concurrent read never sees a gap. */
+export function writeStateTree(files: Record<string, string>): void {
+  const have = readStateTree();
+  for (const [rel, text] of Object.entries(files)) {
+    if (have[rel] === text) continue;
+    const path = appPath(rel);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, text, "utf-8");
+  }
+  for (const rel of Object.keys(have)) if (!(rel in files)) rmSync(appPath(rel), { force: true });
 }
 
 export const removeState = (rel: string): void => rmSync(appPath(rel), { force: true, recursive: true });

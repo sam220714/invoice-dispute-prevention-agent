@@ -1,9 +1,11 @@
 import { listInvoices } from "../lib/app/status";
 import { InvoiceTable } from "./components/InvoiceTable";
+import { hydrate } from "../lib/data/remote_state";
 
 export const dynamic = "force-dynamic";
 
-export default function InvoicesPage() {
+export default async function InvoicesPage() {
+  await hydrate();
   const rows = listInvoices();
   return (
     <>

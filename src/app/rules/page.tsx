@@ -3,10 +3,12 @@ import { loadAllDisputes, loadBuyers, loadLedger, loadOverrides, loadResolvedDis
 import { staleSignal } from "../../lib/engine/overrides";
 import { shortDate } from "../../lib/app/format";
 import { RulesBoard, type RuleData } from "../components/RulesBoard";
+import { hydrate } from "../../lib/data/remote_state";
 
 export const dynamic = "force-dynamic";
 
-export default function RulesPage() {
+export default async function RulesPage() {
+  await hydrate();
   const rules = loadLedger();
   const buyers = loadBuyers();
   const overrides = loadOverrides();

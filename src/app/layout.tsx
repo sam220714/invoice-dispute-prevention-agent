@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { hydrate } from "../lib/data/remote_state";
 import { loadAgency } from "../lib/data/load";
 import { railCounts } from "../lib/app/status";
 import { Rail } from "./components/Rail";
@@ -17,7 +18,8 @@ export const metadata = {
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-plex-sans", display: "swap" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono", display: "swap" });
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  await hydrate();
   const counts = railCounts();
   const agency = loadAgency();
   const biller = agency.team.find((t) => /billing/i.test(t.role)) ?? agency.team[0];

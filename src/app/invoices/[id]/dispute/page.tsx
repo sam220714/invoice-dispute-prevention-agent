@@ -5,10 +5,12 @@ import { listInvoices } from "../../../../lib/app/status";
 import { AnalysisBoard } from "../../../components/AnalysisBoard";
 import { InvoiceBar } from "../../../components/InvoiceBar";
 import { PasteBox } from "../../../components/PasteBox";
+import { hydrate } from "../../../../lib/data/remote_state";
 
 export const dynamic = "force-dynamic";
 
 export default async function DisputePage({ params }: { params: Promise<{ id: string }> }) {
+  await hydrate();
   const { id } = await params;
   const invoice = getInvoice(id);
   const buyer = getBuyer(invoice.buyer_id);

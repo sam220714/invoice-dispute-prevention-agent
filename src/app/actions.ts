@@ -14,6 +14,7 @@ import { computePreview, stagedWithEdits, type Preview } from "../lib/app/analys
 import { buildPresendView, workingDraft } from "../lib/app/presend_view";
 import { proposeFor, describeFinding } from "../lib/app/propose";
 import { analyseMessage, type AnalyzeResponse } from "../lib/app/run_analysis";
+import { hydrate, persisted } from "../lib/data/remote_state";
 import { discardStoredAnalysis, loadAnalysis, loadRecord, resetApp, saveAnalysis, saveRecord, type Approval } from "../lib/app/store";
 
 const MERCHANT = "Sunita Reddy";
@@ -22,7 +23,7 @@ const refresh = () => revalidatePath("/", "layout");
 
 // ---------------------------------------------------------------- pre-send
 /** Take the agent's proposal for one open business finding. The proposal is rebuilt here, never trusted from the page. */
-export async function approveFinding(invoiceId: string, ruleId: string): Promise<{ ok: boolean; error?: string }> {
+async function approveFindingImpl(invoiceId: string, ruleId: string): Promise<{ ok: boolean; error?: string }> {
   const w = workingDraft(invoiceId);
   if (w.readOnly) return { ok: false, error: "This invoice can no longer be changed." };
 
@@ -51,7 +52,7 @@ export async function approveFinding(invoiceId: string, ruleId: string): Promise
 }
 
 /** Waive one business finding for this invoice only. The rule is untouched. */
-export async function waiveFinding(invoiceId: string, ruleId: string, reason: string): Promise<{ ok: boolean; error?: string }> {
+async function waiveFindingImpl(invoiceId: string, ruleId: string, reason: string): Promise<{ ok: boolean; error?: string }> {
   const w = workingDraft(invoiceId);
   if (w.readOnly) return { ok: false, error: "This invoice can no longer be changed." };
   const report = buildPreSendReport({ invoice: w.current.invoice, buyer: w.buyer, annexure: w.current.annexure }, w.rules);
@@ -69,7 +70,7 @@ export async function waiveFinding(invoiceId: string, ruleId: string, reason: st
  * Switch one format fix on or off for this invoice. Fixes are applied by default. Turning one off does not waive
  * the finding or touch the rule: the invoice just goes without that fix, and the ledger still checks it next time.
  */
-export async function setFormatFix(invoiceId: string, ruleId: string, on: boolean): Promise<{ ok: boolean; error?: string }> {
+async function setFormatFixImpl(invoiceId: string, ruleId: string, on: boolean): Promise<{ ok: boolean; error?: string }> {
   const w = workingDraft(invoiceId);
   if (w.readOnly) return { ok: false, error: "This invoice can no longer be changed." };
   const rule = w.rules.find((r) => r.rule_id === ruleId);
@@ -83,7 +84,7 @@ export async function setFormatFix(invoiceId: string, ruleId: string, on: boolea
 }
 
 /** Put a resolved row back as an open finding. */
-export async function undoDecision(invoiceId: string, ruleId: string): Promise<{ ok: boolean }> {
+async function undoDecisionImpl(invoiceId: string, ruleId: string): Promise<{ ok: boolean }> {
   const record = loadRecord(invoiceId);
   if (record.sent_at) return { ok: false };
   if (record.approved.some((a) => a.rule_id === ruleId)) {
@@ -97,7 +98,7 @@ export async function undoDecision(invoiceId: string, ruleId: string): Promise<{
 }
 
 /** Mark the invoice sent. No email goes anywhere: v1 stops at the decision. */
-export async function sendInvoice(invoiceId: string): Promise<{ ok: boolean; error?: string }> {
+async function sendInvoiceImpl(invoiceId: string): Promise<{ ok: boolean; error?: string }> {
   const w = workingDraft(invoiceId);
   if (w.readOnly) return { ok: false, error: "This invoice has already gone out." };
   if (!buildPresendView(invoiceId).sendable) return { ok: false, error: "Something is still open on this invoice." };
@@ -110,7 +111,7 @@ export async function sendInvoice(invoiceId: string): Promise<{ ok: boolean; err
 export type AnalyzeState = { response: AnalyzeResponse | null; text: string };
 
 /** Form action for the paste box. Redirects to the analysis on success. */
-export async function analyzeAction(invoiceId: string, _prev: AnalyzeState, form: FormData): Promise<AnalyzeState> {
+async function analyzeActionImpl(invoiceId: string, _prev: AnalyzeState, form: FormData): Promise<AnalyzeState> {
   const text = String(form.get("message") ?? "");
   const response = await analyseMessage(invoiceId, text);
   if (!response.ok) return { response, text };
@@ -119,7 +120,7 @@ export async function analyzeAction(invoiceId: string, _prev: AnalyzeState, form
 }
 
 /** Throw away an analysis that has not been saved, to paste a different message. */
-export async function discardAnalysis(invoiceId: string): Promise<{ ok: boolean }> {
+async function discardAnalysisImpl(invoiceId: string): Promise<{ ok: boolean }> {
   const stored = loadAnalysis(invoiceId);
   if (!stored || stored.resolved) return { ok: false };
   discardStoredAnalysis(invoiceId);
@@ -129,6 +130,7 @@ export async function discardAnalysis(invoiceId: string): Promise<{ ok: boolean 
 
 /** What the invoice would look like under the merchant's current choices. Money from the engine. */
 export async function previewDecision(invoiceId: string, include: string[], edits: Record<string, number>): Promise<Preview | null> {
+  await hydrate();
   const stored = loadAnalysis(invoiceId);
   return stored ? computePreview(stored.result, include, edits) : null;
 }
@@ -144,7 +146,7 @@ export interface CommitInput {
 }
 
 /** Close the loop: apply the approved business changes, write the rules, file the dispute. */
-export async function commitAnalysis(invoiceId: string, input: CommitInput): Promise<{ ok: boolean; error?: string }> {
+async function commitAnalysisImpl(invoiceId: string, input: CommitInput): Promise<{ ok: boolean; error?: string }> {
   const stored = loadAnalysis(invoiceId);
   if (!stored) return { ok: false, error: "There is no analysis to save." };
   if (stored.resolved) return { ok: false, error: "This dispute is already saved." };
@@ -202,7 +204,7 @@ export async function commitAnalysis(invoiceId: string, input: CommitInput): Pro
 
 // ------------------------------------------------------------------ rules
 /** Switch a rule off or on. A rule that is off is neither checked nor shown to the agent. */
-export async function setRuleStatus(ruleId: string, status: "active" | "disabled"): Promise<{ ok: boolean }> {
+async function setRuleStatusImpl(ruleId: string, status: "active" | "disabled"): Promise<{ ok: boolean }> {
   const ledger = loadLedger();
   if (!ledger.some((r) => r.rule_id === ruleId)) return { ok: false };
   saveLedger(ledger.map((r) => (r.rule_id === ruleId ? { ...r, status } : r)));
@@ -212,9 +214,43 @@ export async function setRuleStatus(ruleId: string, status: "active" | "disabled
 
 // ------------------------------------------------------------------- demo
 /** Back to the start: the seeded ledger, no saved analyses, no decisions, no overrides. */
-export async function resetDemo(): Promise<void> {
+async function resetDemoImpl(): Promise<void> {
   resetState();
   resetApp();
   refresh();
   redirect("/");
+}
+
+// ------------------------------------------------------------ shared state
+// Each action that changes state runs against the shared copy: pulled before, pushed after (remote_state.ts).
+// Kept as thin wrappers so the logic above reads as it always did.
+export async function approveFinding(...args: Parameters<typeof approveFindingImpl>) {
+  return persisted(() => approveFindingImpl(...args));
+}
+export async function waiveFinding(...args: Parameters<typeof waiveFindingImpl>) {
+  return persisted(() => waiveFindingImpl(...args));
+}
+export async function setFormatFix(...args: Parameters<typeof setFormatFixImpl>) {
+  return persisted(() => setFormatFixImpl(...args));
+}
+export async function undoDecision(...args: Parameters<typeof undoDecisionImpl>) {
+  return persisted(() => undoDecisionImpl(...args));
+}
+export async function sendInvoice(...args: Parameters<typeof sendInvoiceImpl>) {
+  return persisted(() => sendInvoiceImpl(...args));
+}
+export async function analyzeAction(...args: Parameters<typeof analyzeActionImpl>) {
+  return persisted(() => analyzeActionImpl(...args));
+}
+export async function discardAnalysis(...args: Parameters<typeof discardAnalysisImpl>) {
+  return persisted(() => discardAnalysisImpl(...args));
+}
+export async function commitAnalysis(...args: Parameters<typeof commitAnalysisImpl>) {
+  return persisted(() => commitAnalysisImpl(...args));
+}
+export async function setRuleStatus(...args: Parameters<typeof setRuleStatusImpl>) {
+  return persisted(() => setRuleStatusImpl(...args));
+}
+export async function resetDemo(...args: Parameters<typeof resetDemoImpl>) {
+  return persisted(() => resetDemoImpl(...args));
 }

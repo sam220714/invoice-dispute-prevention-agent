@@ -3,12 +3,14 @@ import { plural, summarise } from "../../lib/app/format";
 import { loadAnalysis } from "../../lib/app/store";
 import { listInvoices } from "../../lib/app/status";
 import { DisputeTable, type DisputeRow } from "../components/DisputeTable";
+import { hydrate } from "../../lib/data/remote_state";
 
 export const dynamic = "force-dynamic";
 
 const isOpen = (resolution: string) => /^open\b/i.test(resolution.trim());
 
-export default function DisputesPage() {
+export default async function DisputesPage() {
+  await hydrate();
   const buyers = new Map(loadBuyers().map((b) => [b.id, b.short_name]));
   const fresh = new Set(loadResolvedDisputes().map((d) => d.dispute_id));
   const all = [...loadAllDisputes()].sort((a, b) => b.received_at.localeCompare(a.received_at) || b.dispute_id.localeCompare(a.dispute_id));

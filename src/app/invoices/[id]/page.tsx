@@ -6,10 +6,12 @@ import { InvoiceBar } from "../../components/InvoiceBar";
 import { PresendBoard } from "../../components/PresendBoard";
 import { SendButton } from "../../components/SendButton";
 import { SentInvoice } from "../../components/SentInvoice";
+import { hydrate } from "../../../lib/data/remote_state";
 
 export const dynamic = "force-dynamic";
 
 export default async function PresendPage({ params }: { params: Promise<{ id: string }> }) {
+  await hydrate();
   const { id } = await params;
   const view = buildPresendView(id);
   const row = listInvoices().find((r) => r.invoice_id === id)!;
