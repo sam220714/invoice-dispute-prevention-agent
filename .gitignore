@@ -20,8 +20,9 @@ __pycache__/
 # the challenge brief supplied by the organisers; not ours to republish
 RazorpayxISB_BuildChallenge*.pdf
 
-# recorded model replies for offline demo runs: local only, not part of the submission
-fixtures/
+# recorded model replies for offline demo runs: local only, except the one the deployed demo replays
+fixtures/*
+!fixtures/demo-0847.json
 
 # Vercel deploy settings
 .vercel/

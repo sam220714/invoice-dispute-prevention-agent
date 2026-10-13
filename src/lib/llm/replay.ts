@@ -80,6 +80,31 @@ export class ReplayProvider implements LlmProvider {
   }
 }
 
+/**
+ * The demo shortcut. Answers from a recording when this exact prompt was recorded, and from the live model
+ * otherwise. So the one email the demo is built around comes back at once, and anything else a visitor pastes
+ * is still analysed for real. The recording is a real model reply, never edited, and its model name is
+ * tagged "(replayed)" so it cannot pass for a live call.
+ */
+export class ReplayOrLiveProvider implements LlmProvider {
+  readonly name: string;
+
+  constructor(
+    private readonly fixtureName: string,
+    private readonly live: LlmProvider,
+  ) {
+    this.name = `replay-or-live(${fixtureName}, ${live.name})`;
+  }
+
+  async generate(req: GenerateRequest): Promise<GenerateResult> {
+    const fixture = readFixture(this.fixtureName) as Fixture | null;
+    const key = requestKey(req);
+    const hit = fixture?.calls.find((c) => c.key === key);
+    if (hit) return { text: hit.text, model: `${hit.model} (replayed)`, usage: hit.usage, attempts: [] };
+    return this.live.generate(req);
+  }
+}
+
 /** For tests: returns canned replies in order, and remembers what it was asked. */
 export class StubProvider implements LlmProvider {
   readonly name = "stub";

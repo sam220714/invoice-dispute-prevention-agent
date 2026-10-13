@@ -6,7 +6,7 @@ import { assembleContext, type ContextInput } from "../engine/context";
 import { AnalysisError } from "../engine/llm_call";
 import { geminiFromEnv } from "../llm/gemini";
 import { LlmError, type LlmProvider } from "../llm/provider";
-import { RecordingProvider, ReplayProvider } from "../llm/replay";
+import { RecordingProvider, ReplayOrLiveProvider, ReplayProvider } from "../llm/replay";
 import { loadAnalysis, saveAnalysis } from "./store";
 
 /**
@@ -53,6 +53,9 @@ function providerFromEnv(): LlmProvider {
   const replay = process.env.ANALYZE_REPLAY;
   if (replay) return new ReplayProvider(replay);
   const live = geminiFromEnv();
+  // The deployed demo: the recorded email is instant, everything else is live.
+  const demo = process.env.ANALYZE_DEMO_REPLAY;
+  if (demo) return new ReplayOrLiveProvider(demo, live);
   const record = process.env.ANALYZE_RECORD;
   return record ? new RecordingProvider(live, record) : live;
 }

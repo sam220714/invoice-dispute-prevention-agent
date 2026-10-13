@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { LlmError, requestKey, type GenerateRequest } from "./provider";
-import { RecordingProvider, ReplayProvider, StubProvider } from "./replay";
+import { RecordingProvider, ReplayOrLiveProvider, ReplayProvider, StubProvider } from "./replay";
 
 const req = (user = "question"): GenerateRequest => ({ system: "sys", user, schema: { type: "object" } });
 
@@ -91,5 +91,31 @@ describe("StubProvider", () => {
     const stub = new StubProvider(["a", "b"]);
     expect([(await stub.generate(req())).text, (await stub.generate(req())).text, (await stub.generate(req())).text]).toEqual(["a", "b", "b"]);
     expect(stub.requests).toHaveLength(3);
+  });
+});
+
+describe("replay or live", () => {
+  it("answers the recorded prompt from the recording and anything else from the live model", async () => {
+    const recorder = new RecordingProvider(new StubProvider(["recorded answer"]), "demo");
+    await recorder.generate(req("the demo email"));
+
+    const live = new StubProvider(["live answer"]);
+    const provider = new ReplayOrLiveProvider("demo", live);
+
+    const recorded = await provider.generate(req("the demo email"));
+    expect(recorded.text).toBe("recorded answer");
+    expect(recorded.model).toContain("(replayed)");
+    expect(live.requests).toHaveLength(0); // the network was not touched
+
+    const other = await provider.generate(req("something a visitor pasted"));
+    expect(other.text).toBe("live answer");
+    expect(other.model).toBe("stub");
+    expect(live.requests).toHaveLength(1);
+  });
+
+  it("goes live when there is no recording at all", async () => {
+    const live = new StubProvider(["live answer"]);
+    const result = await new ReplayOrLiveProvider("missing", live).generate(req());
+    expect(result.text).toBe("live answer");
   });
 });

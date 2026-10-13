@@ -238,6 +238,7 @@ environment variables in Project Settings:
 | `GEMINI_API_KEY` | your key | the live classification call |
 | `LEDGER_RULES` | `12` | start from 12 of 15 rules, so the demo has something new to learn |
 | `ANALYZE_RECEIVED_ON` | `2026-10-06` | the day the demo email counts as received |
+| `ANALYZE_DEMO_REPLAY` | `demo-0847` | answer the demo email from its recording (see below) |
 
 What changes on Vercel, and why:
 
@@ -250,6 +251,11 @@ What changes on Vercel, and why:
   ledger.
 - **The answer key never ships.** `next.config.mjs` lists what the deployment bundles: `dataset/*.json`,
   `dataset/*.txt` and `prompts/*.md`, and excludes `dataset/qa/`.
+- **The demo email is answered from a recording.** A live analysis takes about 20 seconds, which is long on stage.
+  With `ANALYZE_DEMO_REPLAY=demo-0847` the deployed app replays `fixtures/demo-0847.json` for the exact demo
+  email (a real Gemini reply, recorded once and never edited, tagged "(replayed)"). It only matches that email
+  against a fresh ledger. Any other message, or the same email after the ledger has changed, is analysed live.
+  Everything after the model call (mapping, arithmetic, rules, the pre-send check) runs for real either way.
 - **Analysis can take a while.** The analysis is a live model call, so the app asks for the 60-second ceiling
   (`maxDuration` in `src/app/layout.tsx`) rather than the platform default.
 
