@@ -6,6 +6,9 @@ import { Rail } from "./components/Rail";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
+// The dispute analysis is a live Gemini call run as a server action, and a busy model can take a while.
+// 60s is the ceiling on every Vercel plan; the default would cut it off at 10-15s.
+export const maxDuration = 60;
 export const metadata = {
   title: "Razorpay · Invoices",
   description: "Catch the dispute before the invoice goes out.",

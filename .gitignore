@@ -22,3 +22,6 @@ RazorpayxISB_BuildChallenge*.pdf
 
 # recorded model replies for offline demo runs: local only, not part of the submission
 fixtures/
+
+# Vercel deploy settings
+.vercel/

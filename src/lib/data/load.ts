@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
@@ -28,11 +29,30 @@ import { DEMO_SEED, splitLedger, type LedgerSplit } from "./split";
  * through here, and the answer key (dataset/qa) is refused outright: if it
  * reached a prompt the demo would prove nothing.
  */
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const ROOT = findRoot();
+
+/**
+ * The project root. Beside this file's source when running from source (tsx, vitest). Once Next has bundled
+ * the app, import.meta.url points at the build machine's checkout, so fall back to the working directory,
+ * which is the deployment root on Vercel.
+ */
+function findRoot(): string {
+  const fromSource = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+  return [fromSource, process.cwd()].find((dir) => existsSync(join(dir, "dataset"))) ?? fromSource;
+}
+
+/**
+ * Where mutable state lives. state/ in the project, except on Vercel where the deployment is read-only and
+ * only the temp directory is writable. That copy outlives requests on a warm instance but not a cold start,
+ * and the ledger reseeds itself from the dataset when it is missing, so a cold start is a clean demo, never a crash.
+ */
+function defaultStateDir(): string {
+  return process.env.VERCEL ? join(tmpdir(), "dispute-agent-state") : join(ROOT, "state");
+}
 const ANSWER_KEY_DIR = "qa";
 
 const datasetDir = () => resolve(process.env.DATASET_DIR ?? join(ROOT, "dataset"));
-const stateDir = () => resolve(process.env.STATE_DIR ?? join(ROOT, "state"));
+const stateDir = () => resolve(process.env.STATE_DIR ?? defaultStateDir());
 const promptsDir = () => resolve(process.env.PROMPTS_DIR ?? join(ROOT, "prompts"));
 const fixturesDir = () => resolve(process.env.FIXTURES_DIR ?? join(ROOT, "fixtures"));
 
